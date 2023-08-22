@@ -54,8 +54,6 @@ void Tokenizador(){
       "Mientras",
       "Repetir",
       "="};
-      Console.WriteLine(Codigo.Length);
-      Console.ReadLine();
      while(Pos < Codigo.Length - 1){
         if (CharVal.Contains(Codigo[Pos])){
           Texto += Codigo[Pos];
@@ -66,6 +64,7 @@ void Tokenizador(){
             if (Funciones.Contains(Texto)){
               Tokens.Add((Texto,"Funcion","{Vacio}"));
               Texto = "";
+              
               Avanzar();
               break;
               }
@@ -96,7 +95,9 @@ void Tokenizador(){
         }
         
     }
-    Texto += Codigo[Pos];
+    if (Codigo[Pos] != ' '){
+      Texto += Codigo[Pos];
+    }
     if (Texto != " " && Texto != string.Empty){
           Tokens.Add((Texto,"Variable","{Vacio}"));
         }
@@ -104,15 +105,7 @@ void Tokenizador(){
   if (Pos < Codigo.Length - 1){
     Pos++;
   }
-  else{
-    Console.WriteLine("Fin");
-    Console.ReadLine();
-    Environment.Exit(0);
-  }
 }
   }
 }
-
-
-
 }
