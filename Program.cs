@@ -642,12 +642,12 @@ namespace Chaos
                                     Compilado += " System.Console.ReadLine()";
                                     if (Valargs == "JIT" || Valargs == "Ambos")
                                     {
-                                        Avanzar(Token - Pos);
+                                        Avanzar(Token + 1 - Pos);
                                         return (Console.ReadLine(), "String");
                                     }
                                     else
                                     {
-                                        Avanzar(Token - Pos);
+                                        Avanzar(Token + 1 - Pos);
                                         return ("Loremp", "String");
                                         
                                     }
@@ -663,7 +663,7 @@ namespace Chaos
                                 else
                                 {
                                     Compilado += " " + Variables[Original].Nombre;
-                                    Avanzar(Token - Pos);
+                                    Avanzar(Token + 1 - Pos);
                                     return (Variables[Original].Valor, Variables[Original].Tipo);
                                 }
                                 break;
