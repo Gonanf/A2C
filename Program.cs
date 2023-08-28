@@ -20,8 +20,8 @@ namespace Chaos
         static void Main(string[] args)
         {
             //DATOS DE SOFTWARE////////////
-            string Vercion = "0.0.3";    //
-            string Edicion = "Debug"; //
+            string Vercion = "0.0.4";    //
+            string Edicion = "Estandar";   //
             //////////////////////////////
             //Lista de tokens, almacenaran las funciones y variable
             List<(string Valor, string Tipo)> Tokens = new List<(string Valor, string Tipo)>();
@@ -310,7 +310,7 @@ namespace Chaos
                 int Pos = 0;
                 //Las primeras lineas en la traduccion de A2C a C#
                 string Compilado = "using System;\n" +
-                    "namespace Chaos {\n " +
+                    "namespace Chaos {\n" +
                     "class A2C {\n" +
                     "static void Main(){\n";
                 //CodeDOM
@@ -388,101 +388,36 @@ namespace Chaos
                             }
                             break;
                         //Si el token es de tipo variable
+                             ////////////////////
+                            //ASIGNAR VARIABLE//
+                           ////////////////////
                         case "Variable":
                             ImprimirPorDebug("Es variable");
                             //Si tiene tokens suficientes (Para el = y un asignador)
                             if (SiExisteTokens(2))
                             {
                                 //Si el siguiente token es una funcion
-                                if (Tokens[Pos + 1].Tipo == "Funcion")
+                                if (Tokens[Pos + 1].Tipo == "Funcion" && Tokens[Pos + 1].Valor == "=")
                                 {
-                                    ImprimirPorDebug("Hay =");
-                                    //Guardar el token a modificar, buscado como variable
+                                    (string Valor, string Tipo) Resultado;
+                                    int PosNombre = Pos;
                                     int Original = IndexVar(Tokens[Pos].Valor);
-                                    //Guardar el token a asignar, buscado como variable
-                                    int Nuevo = IndexVar(Tokens[Pos + 2].Valor);
-                                    switch (Tokens[Pos + 1].Valor)
+                                    if (Original == -1)
                                     {
-                                        case "=":
-                                            ImprimirPorDebug("Asignando");
-                                            ///////////////////////
-                                            //CODIGO A OPTIMIZAR//
-                                            //////////////////////
-                                            //Obtener el valor actual de la variable, en caso que se sume a si misma
-                                            (string Tipo, string Valor) Anterior = (String.Empty, String.Empty);
-                                            //Si existe la variable a modificar
-                                            if (Original != -1)
-                                            {
-                                                //Guardarlo
-                                                Anterior = (Variables[Original].Tipo, Variables[Original].Valor);
-                                            }
-                                            //Asignar el token actual con el siguiente (en realida el +2, por q el siguiente es un = )
-                                            Asignar();
-                                            //Original es la nueva variable
-                                            Original = IndexVar(Tokens[Pos].Valor);
-                                            ImprimirPorDebug("Asignado");
-                                            Avanzar(3);
-                                            ImprimirPorDebug("Avanzando 3");
-                                            //Si es una funcion y es una operacion
-                                            if (Tokens[Pos].Tipo == "Funcion" && Operaciones.Contains(Tokens[Pos].Valor))
-                                            {
-                                                //Andar guardando el resultado
-                                                (string Tipo, string Valor) Resultado;
-                                                ImprimirPorDebug("Empezando a sumar");
-                                                //Si se suma a si mismo
-                                                if (Anterior.Tipo != String.Empty && Tokens[Pos + 1].Tipo == "Variable" && Tokens[Pos + 1].Valor == Variables[Original].Nombre)
-                                                {
-                                                    //Sumar lo que contiene actualmente con lo que contenia antes
-                                                    Resultado = OperacionVV((Variables[Original].Tipo, Variables[Original].Valor), (Anterior.Tipo, Anterior.Valor), Tokens[Pos].Valor);
-                                                    //Asignarlo a la variable original
-                                                    Variables[Original] = (Variables[Original].Nombre, Resultado.Tipo, Resultado.Valor);
-                                                }
-                                                else
-                                                {
-                                                    //Si no se suma asi mismo, sumar con el siguiente token
-                                                    Resultado = OperacionVV((Variables[Original].Tipo, Variables[Original].Valor), (Tokens[Pos + 1].Tipo, Tokens[Pos + 1].Valor), Tokens[Pos].Valor);
-                                                    //Asignarlo a la variable original
-                                                    Variables[Original] = (Variables[Original].Nombre, Resultado.Tipo, Resultado.Valor);
-                                                }
-                                                Avanzar(2);
-                                                ImprimirPorDebug("Avanzo 2, termino de sumar el primer valor");
-                                                //Operar todos los valores validos que existan 
-                                                while (Operaciones.Contains(Tokens[Pos].Valor))
-                                                {
-                                                    ImprimirPorDebug("Sumando");
-                                                    //Si se suma a si misma
-                                                    if (Anterior.Tipo != String.Empty && Tokens[Pos + 1].Tipo == "Variable" && Tokens[Pos + 1].Valor == Variables[Original].Nombre)
-                                                    {
-                                                        //Sumar el valor actual con el anterior
-                                                        Resultado = OperacionVV((Variables[Original].Tipo, Variables[Original].Valor), (Anterior.Tipo, Anterior.Valor), Tokens[Pos].Valor);
-                                                        //Asignar a la variable original
-                                                        Variables[Original] = (Variables[Original].Nombre, Resultado.Tipo, Resultado.Valor);
-                                                    }
-                                                    else
-                                                    {
-                                                        //Si no se suma a si misma, sumar con el siguiente token
-                                                        Resultado = OperacionVV((Variables[Original].Tipo, Variables[Original].Valor), (Tokens[Pos + 1].Tipo, Tokens[Pos + 1].Valor), Tokens[Pos].Valor);
-                                                        //Asignar a la variable original
-                                                        Variables[Original] = (Variables[Original].Nombre, Resultado.Tipo, Resultado.Valor);
-                                                    }
-                                                    Avanzar(2);
-                                                }
-                                                //Termina la operacion de todos los tokens validos
-                                            }
-                                            //Termina la suma
-                                            continue;
-                                        //Si no hay operacion o paso algo
-                                        default:
-                                            ImprimirPorDebug("Luego de la variable no hay operacion");
-                                            if (Valargs == "Depurar")
-                                            {
-                                                //Situacion de advertencia
-                                            }
-                                            //Situacion de error
-                                            Avanzar(1);
-                                            break;
+                                        Compilado += "var " + Tokens[Pos].Valor + " = ";
+                                        Resultado = OperarVVM(Tokens[Pos + 2], Pos + 2);
+                                        Variables.Add((Tokens[PosNombre].Valor,Resultado.Tipo,Resultado.Valor));
                                     }
-                                    //Termina switch del valor de token + 1
+                                    else
+                                    {
+                                        Compilado += Tokens[Pos].Valor + " = ";
+                                        Resultado = OperarVVM(Tokens[Pos + 2], Pos + 2);
+                                        Variables[Original] = ((Variables[Original].Nombre, Resultado.Tipo, Resultado.Valor));
+                                    }
+                                    Compilado += ";\n";
+                                     
+
+
                                 }
                                 //Termina el if del valor de token + 1
 
@@ -505,6 +440,9 @@ namespace Chaos
                     continue;
                 }
                 //Termina while principal
+                ////////////////////
+                //    COMPILAR    //
+                ////////////////////
                 if (Valargs == "CMP" || Valargs == "Ambos")
                 {
                     //Empezar a compilar
@@ -527,7 +465,10 @@ namespace Chaos
                     }
                     Console.ForegroundColor = ConsoleColor.White;
                 }
-                //DEBUG
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                ////////////////////
+                //     DEBUG      //
+                ////////////////////
                 void ImprimirPorDebug(string texto)
                 {
                     if (Edicion == "Debug")
@@ -545,6 +486,9 @@ namespace Chaos
 
                     }
                 }
+                ////////////////////
+                //SI EXISTE TOKENS//
+                ////////////////////
                 //Si existe los tokens despues de la suma
                 bool SiExisteTokens(int num)
                 {
@@ -558,6 +502,9 @@ namespace Chaos
                     }
                 }
                 //Aumentar en index la posicion
+                ////////////////////
+                //    AVANZAR     //
+                ////////////////////
                 void Avanzar(int num)
                 {
                     if (Pos + num < Tokens.Count())
@@ -570,6 +517,9 @@ namespace Chaos
                     }
                 }
                 //Obtener el index de la variable a buscar
+                ////////////////////
+                //   INDEX VAR    //
+                ////////////////////
                 int IndexVar(string Nombre)
                 {
                     //Si hay variables
@@ -605,6 +555,9 @@ namespace Chaos
                 }
                 //Fin IndexVar
                 //Imprime valores
+                ////////////////////
+                //    IMPRIMIR    //
+                ////////////////////
                 void Imprimir(string Valor, string Tipo)
                 {
                     //Si el valor a imprimir es una variable
@@ -669,326 +622,220 @@ namespace Chaos
                 }
                 //Termina imprimir
                 //Añadir error: una manera facil de añadir un mensaje de error
+                ////////////////////
+                //  AÑADIR ERROR  //
+                ////////////////////
                 void AñadirError(string mensaje)
                 {
                     Errores.Add((mensaje, Pos));
                 }
-                //Sumar entre 2 tokens con cierta operacion
-                (string Tipo, string Valor) OperacionVV((string Tipo, string Valor) Var1, (string Tipo, string Valor) Var2, string Operacion)
+                //OPERACION VVM
+                (string Valor, string Tipo) OperarVVM((string Valor, string Tipo) V1, int Token)
                 {
-                    //Si el tipo a sumar es variable
-                    if (Var2.Tipo == "Variable")
+                    if (!Operaciones.Contains(Tokens[Token + 1].Valor))
                     {
-                        //Si existe
-                        int Temporal = IndexVar(Var2.Valor);
-                        if (Temporal != -1)
+                        switch (V1.Tipo)
                         {
-                            //Ajustar su valor con el de la variable (Antes solo hacia referencia al nombre)
-                            Var2 = (Variables[Temporal].Tipo, Variables[Temporal].Valor);
-                        }
-                        else//Si no dar error
-                        {
-                            //Situacion de error
-                        }
-                    }
-                    //Si ambos son enteros
-                    if (Var1.Tipo == "Entero" && Var2.Tipo == "Entero")
-                    {
-                        switch (Operacion)
-                        {
-                            case "+":
-                                return ("Entero", (Int32.Parse(Var1.Valor) + Int32.Parse(Var2.Valor)).ToString());
-                            case "-":
-                                return ("Entero", (Int32.Parse(Var1.Valor) - Int32.Parse(Var2.Valor)).ToString());
-                            case "*":
-                                return ("Entero", (Int32.Parse(Var1.Valor) * Int32.Parse(Var2.Valor)).ToString());
-                            case "/":
-                                return ("Entero", (Int32.Parse(Var1.Valor) / Int32.Parse(Var2.Valor)).ToString());
-                        }
-                    }
-                    //Si uno es string
-                    else if (Var1.Tipo == "String")
-                    {
-                        //Solo se pueden sumar los strings
-                        switch (Operacion)
-                        {
-                            case "+":
-                                return ("String", Var1.Valor + Var2.Valor);
-                            case "-":
-                                //Situacion de error
-                                return ("", "");
-                            case "*":
-                                //Situacion de error
-                                return ("", "");
-                            case "/":
-                                //Situacion de error
-                                return ("", "");
-                        }
-                    }
-                    //En otro caso, error
-
-                    //situacion de error
-                    return ("", "");
-                }
-                //Termina OperacionVV
-
-                //////////////////////
-                //CODIGO A OPTIMIZAR//
-                /////////////////////
-
-                //Asignar (La parte mas dificil)
-                void Asignar()
-                {
-                    //Guardar el valor a asignar
-                    int Original = IndexVar(Tokens[Pos].Valor);
-                    if (Tokens[Pos + 2].Tipo == "String" || Tokens[Pos + 2].Tipo == "Entero")
-                    {
-                        //Si el token a obtener valor es string o entero
-                        ImprimirPorDebug("Asignar string o entero");
-                        //Si es una depuracion (No compila nada)
-                        if (Valargs == "Depurar")
-                        {
-                            //Si la variable a asignar no existe
-                            if (Original == -1)
-                            {
-                                ImprimirPorDebug("Depurar si no existe variable, añadirlo");
-                                //Añadirlo
-                                Variables.Add((Tokens[Pos].Valor, Tokens[Pos + 2].Tipo, Tokens[Pos + 2].Valor));
-                            }
-                            else
-                            {
-                                //Sino, modificarlo
-                                ImprimirPorDebug("Depurar si existe la variable, cambiar su valor y tipos");
-                                Variables[Original] = ((Tokens[Pos].Valor, Tokens[Pos + 2].Tipo, Tokens[Pos + 2].Valor));
-                            }
-                            //Si es JIT o CMP o Ambos
-                        }else if (Original == -1)//Si no existe la variable
+                            case "Funcion":
+                                if (V1.Valor == "Leer")
                                 {
-                                    ImprimirPorDebug("Ambos si no existe variable, añadirlo y compilarlo");
-                                    //Añadirlo
-                                    Variables.Add((Tokens[Pos].Valor, Tokens[Pos + 2].Tipo, Tokens[Pos + 2].Valor));
-                                    Compilado += "var " + Tokens[Pos].Valor + " = " + "\"" + Tokens[Pos + 2].Valor + "\"" + ";\n";
-                                }
-                                else//Sino
-                                {
-                                    ImprimirPorDebug("CMP si existe variable, cambiarlo y compilarlo");
-                                    //Modificarlo
-                                    Variables[Original] = ((Tokens[Pos].Valor, Tokens[Pos + 2].Tipo, Tokens[Pos + 2].Valor));
-                                    Compilado += Variables[Original].Nombre + " = " + "\"" + Tokens[Pos + 2].Valor + "\"" + ";\n";
-                                }
-
-                        }
-                    //Si es una variable el token a asignar
-                    else if (Tokens[Pos + 2].Tipo == "Variable")
-                    {
-                        ImprimirPorDebug("Si a asignar es una variable");
-                        //Si es depuracion
-                        if (Valargs == "Depurar")
-                        {
-                            //Si no existe la variable original
-                            if (Original == -1)
-                            {
-                                ImprimirPorDebug("Depurar si no existe la variable original");
-                                int Nuevo = -1;
-                                //Si hay espacio para asignar
-                                if (SiExisteTokens(2))
-                                {
-                                    //Guardar el token asignador
-                                    Nuevo = IndexVar(Tokens[Pos + 2].Valor);
-                                }
-                                else //si no hay espacio
-                                {
-                                    if (Valargs == "Depurar")
+                                    Compilado += " System.Console.ReadLine()";
+                                    if (Valargs == "JIT" || Valargs == "Ambos")
                                     {
-                                        //Aqui añade a la lista de errores el error
+                                        Avanzar(Token - Pos);
+                                        return (Console.ReadLine(), "String");
                                     }
+                                    else
+                                    {
+                                        Avanzar(Token - Pos);
+                                        return ("Loremp", "String");
+                                        
+                                    }
+                                }
+                                break;
+                            case "Variable":
+                                int Original = IndexVar(V1.Valor);
+                                if (Original == -1)
+                                {
                                     //Situacion de error
                                     Environment.Exit(0);
                                 }
-                                if (Nuevo != -1)//Si la variable nueva existe
-                                {
-                                    ImprimirPorDebug("La variable nueva existe, añadir su tipo y valor");
-                                    //Añadir
-                                    Variables.Add((Tokens[Pos].Valor, Variables[Nuevo].Tipo, Variables[Nuevo].Valor));
-                                }
-                            else//Sino, error (Asignar una variable no declarada)
-                            {
-                                ImprimirPorDebug("La variable nueva no existe");
-                                if (Valargs == "Depurar")
-                                {
-                                    //Aqui añade a la lista de errores el error
-                                }
-                                //Situacion de error
-                                Environment.Exit(0);
-                            }
-                        }
-                        else//Si la variable original existe
-                        {
-                            ImprimirPorDebug("Depurar si existe la variable original");
-                            int Nuevo = -1;
-                            if (SiExisteTokens(2))
-                            {
-                                Nuevo = IndexVar(Tokens[Pos + 2].Valor);
-                            }
-                            else
-                            {
-                                if (Valargs == "Depurar")
-                                {
-                                    //Aqui añade a la lista de errores el error
-                                }
-                                //Situacion de error
-                                Environment.Exit(0);
-                            }
-                            if (Nuevo != -1)
-                            {
-                                ImprimirPorDebug("Si la variable nueva existe");
-                                Variables[Original] = ((Tokens[Pos].Valor, Variables[Nuevo].Tipo, Variables[Nuevo].Valor));
-                                Original = IndexVar(Tokens[Pos].Valor);
-                            }
-                            else
-                            {
-                                ImprimirPorDebug("La variable nueva no existe");
-                                if (Valargs == "Depurar")
-                                {
-                                    //Aqui añade a la lista de errores el error
-                                }
-                                //Situacion de error
-                                Environment.Exit(0);
-                            }
-
-                        }
-                        }else if (Original == -1) //Si no es depurar, sino es JIT o CMP o Ambos
-                                {
-                                    ImprimirPorDebug("Ambos la variable original no existe");
-                                    int Nuevo = -1;
-                                    if (SiExisteTokens(2))
-                                    {
-                                        Nuevo = IndexVar(Tokens[Pos + 2].Valor);
-                                    }
-                                    else
-                                    {
-                                        if (Valargs == "Depurar")
-                                        {
-                                            //Aqui añade a la lista de errores el error
-                                        }
-                                        //Situacion de error
-                                        Environment.Exit(0);
-                                    }
-                                    if (Nuevo != -1)
-                                    {
-                                        ImprimirPorDebug("La variable nueva existe");
-                                        Variables.Add((Tokens[Pos].Valor, Variables[Nuevo].Tipo, Variables[Nuevo].Valor));
-                                        Original = IndexVar(Tokens[Pos].Valor);
-                                        Compilado += "var " + Variables[Original].Nombre + " = " + Variables[Nuevo].Nombre + ";\n";
-                                    }
-                                    else
-                                    {
-                                        ImprimirPorDebug("La nueva variable no existe");
-                                        if (Valargs == "Depurar")
-                                        {
-                                            //Aqui añade a la lista de errores el error
-                                        }
-                                        //Situacion de error
-                                        Environment.Exit(0);
-                                    }
-
-                                }
                                 else
                                 {
-                                    ImprimirPorDebug("Ambos la variable original existe");
-                                    int Nuevo = -1;
-                                    if (SiExisteTokens(2))
-                                    {
-                                        Nuevo = IndexVar(Tokens[Pos + 2].Valor);
-                                    }
-                                    else
-                                    {
-                                        if (Valargs == "Depurar")
-                                        {
-                                            //Aqui añade a la lista de errores el error
-                                        }
-                                        //Situacion de error
-                                        Environment.Exit(0);
-                                    }
-                                    if (Nuevo != -1)
-                                    {
-                                        ImprimirPorDebug("La variable nueva existe");
-                                        Variables[Original] = ((Tokens[Pos].Valor, Variables[Nuevo].Tipo, Variables[Nuevo].Valor));
-                                        Compilado += Variables[Original].Nombre + " = " + Variables[Nuevo].Nombre + ";\n";
-                                        Original = IndexVar(Tokens[Pos].Valor);
-                                    }
-                                    else
-                                    {
-                                        ImprimirPorDebug("La variable nueva no existe");
-                                        if (Valargs == "Depurar")
-                                        {
-                                            //Aqui añade a la lista de errores el error
-                                        }
-                                        //Situacion de error
-                                        Environment.Exit(0);
-                                    }
-
+                                    Compilado += " " + Variables[Original].Nombre;
+                                    Avanzar(Token - Pos);
+                                    return (Variables[Original].Valor, Variables[Original].Tipo);
                                 }
-                    }//Si no es variable
-                    else if (Tokens[Pos + 2].Tipo == "Funcion")
-                    {
-                        ImprimirPorDebug("Asignado es una funcion");
-                        if (Tokens[Pos + 2].Valor == "Leer")
-                        {
-                           //Si se le asigna leer
-                            ImprimirPorDebug("Asignado es Leer");
-                            if (Valargs == "Depurar")
-                            {
-                                if (Original == -1)
-                                {
-                                    //En modo depuracion no pedir que ingrese valroes
-                                    ImprimirPorDebug("Depurar la variable original no existe");
-                                    string tem = "Lorem psium";
-                                    Console.ForegroundColor = ConsoleColor.White;
-                                    Variables.Add((Tokens[Pos].Valor, "String", tem));
-                                    Original = IndexVar(Tokens[Pos].Valor);
-                                }
-                                else
-                                {
-                                    ImprimirPorDebug("Depurar la variable original existe");
-                                    Console.ForegroundColor = ConsoleColor.Blue;
-                                    string tem = "Lorem psium";
-                                    Console.ForegroundColor = ConsoleColor.White;
-                                    Variables[Original] = ((Tokens[Pos].Valor, "String", tem));
-                                }
-                            }else if (Original == -1)// Si no es depuracion, sino JIT, CMP o Ambos
-                                    {
-                                        ImprimirPorDebug("Ambos la variable original no existe");
-                                        Console.ForegroundColor = ConsoleColor.Blue;
-                                        string tem = Console.ReadLine();
-                                        Console.ForegroundColor = ConsoleColor.White;
-                                        Compilado += "var " + Tokens[Pos].Valor + " = " + " System.Console.ReadLine();\n";
-                                        Variables.Add((Tokens[Pos].Valor, "String", tem));
-                                        Original = IndexVar(Tokens[Pos].Valor);
-                                    }
-                                    else
-                                    {
-                                        ImprimirPorDebug("Ambos la variable original existe");
-                                        Console.ForegroundColor = ConsoleColor.Blue;
-                                        string tem = Console.ReadLine();
-                                        Console.ForegroundColor = ConsoleColor.White;
-                                        Variables[Original] = ((Tokens[Pos].Valor, "String", tem));
-                                        Compilado += Variables[Original].Nombre + " = " + " System.Console.ReadLine();\n";
-                                    }
-                            }
+                                break;
                         }
-                        else
-                        {
-                            ImprimirPorDebug("Es alguna otra funcion ademas de Leer");
-                            if (Valargs == "Depurar")
-                            {
-                                //Aqui añade a la lista de errores el error
-                            }
-                            //Situacion de error
-                            Environment.Exit(0);
-                        }
+                        return V1;
                     }
-                //Fin void Asignar
+                    else
+                    {
+                        Token++;
+                        (string Valor, string Tipo) Sumados = V1;
+                        switch (V1.Tipo)
+                        {
+                            case "String":
+                                Compilado += " " + "\"" + V1.Valor + "\"";
+                                break;
+                            case "Funcion":
+                                if (V1.Valor == "Leer")
+                                {
+                                    Compilado += " System.Console.ReadLine()";
+                                    if (Valargs == "JIT" || Valargs == "Ambos")
+                                    {
+                                        string temp = Console.ReadLine();
+                                        Sumados = (temp, "String");
+                                    }
+                                }
+                                else
+                                {
+                                    //Situacion de error
+                                    Environment.Exit(0);
+                                }
+                                break;
+                            case "Variable":
+                                int Original = IndexVar(V1.Valor);
+                                if (Original != -1)
+                                {
+                                    Compilado += " " + V1.Valor;
+                                    Sumados = (Variables[Original].Valor, Variables[Original].Tipo);
+                                    break;
+                                }
+                                else
+                                {
+                                    Console.WriteLine("No existe var " + V1);
+                                    //Caso de error
+                                    Environment.Exit(0);
+                                }
+                                break;
+                            default:
+                                Compilado += " " + V1.Valor;
+                                break;
+                        }
+                        while (Operaciones.Contains(Tokens[Token].Valor))
+                        {
+                            Compilado += " " + Tokens[Token].Valor + " ";
+                            switch (Tokens[Token + 1].Tipo)
+                            {
+                                case "Funcion":
+                                    if (Tokens[Token + 1].Valor == "Leer")
+                                    {
+                                        //Situacion de error
+                                        Environment.Exit(0);
+                                    }
+                                    break;
+                                case "Variable":
+                                    int Nuevo = IndexVar(Tokens[Token + 1].Valor);
+                                    if (Nuevo == -1)
+                                    {
+                                        //Caso de error
+                                        Environment.Exit(0);
+                                    }
+                                    else if (Sumados.Tipo == "Entero" && Variables[Nuevo].Tipo == "Entero")
+                                    {
+                                        Compilado += " " + Variables[Nuevo].Nombre;
+                                        switch (Tokens[Token].Valor)
+                                        {
+                                            case "+":
+                                                Sumados = ((Int32.Parse(Sumados.Valor) + Int32.Parse(Variables[Nuevo].Valor)).ToString(), "Entero");
+                                                break;
+                                            case "-":
+                                                Sumados = ((Int32.Parse(Sumados.Valor) - Int32.Parse(Variables[Nuevo].Valor)).ToString(), "Entero");
+                                                break;
+                                            case "*":
+                                                Sumados = ((Int32.Parse(Sumados.Valor) * Int32.Parse(Variables[Nuevo].Valor)).ToString(), "Entero");
+                                                break;
+                                            case "/":
+                                                Sumados = ((Int32.Parse(Sumados.Valor) / Int32.Parse(Variables[Nuevo].Valor)).ToString(), "Entero");
+                                                break;
+                                            default:
+                                                //Caso de error
+                                                Environment.Exit(0);
+                                                break;
+                                        }
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        Compilado += " " + Variables[Nuevo].Nombre;
+                                        switch (Tokens[Token].Valor)
+                                        {
+                                            case "+":
+                                                
+                                                Sumados = (Sumados.Valor + Variables[Nuevo].Valor, "String");
+                                                break;
+                                            default:
+                                                //Caso de error
+                                                Environment.Exit(0);
+                                                break;
+                                        }
+
+                                    }
+                                    break;
+                                case "Entero":
+                                    if (Sumados.Tipo == "Entero")
+                                    {
+                                        Compilado += " " + Tokens[Token + 1].Valor;
+                                        switch (Tokens[Token].Valor)
+                                        {
+                                            case "+":
+                                                Sumados = ((Int32.Parse(Sumados.Valor) + Int32.Parse(Tokens[Token + 1].Valor)).ToString(), "Entero");
+                                                break;
+                                            case "-":
+                                                Sumados = ((Int32.Parse(Sumados.Valor) - Int32.Parse(Tokens[Token + 1].Valor)).ToString(), "Entero");
+                                                break;
+                                            case "*":
+                                                Sumados = ((Int32.Parse(Sumados.Valor) * Int32.Parse(Tokens[Token + 1].Valor)).ToString(), "Entero");
+                                                break;
+                                            case "/":
+                                                Sumados = ((Int32.Parse(Sumados.Valor) / Int32.Parse(Tokens[Token + 1].Valor)).ToString(), "Entero");
+                                                break;
+                                            default:
+                                                //Caso de error
+                                                Environment.Exit(0);
+                                                break;
+                                        }
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        Compilado += " " + "\"" + Tokens[Token + 1].Valor + "\"";
+                                        switch (Tokens[Token].Valor)
+                                        {
+                                            case "+":
+                                                Sumados = (Sumados.Valor + Tokens[Token + 1].Valor, "String");
+                                                break;
+                                            default:
+                                                //Caso de error
+                                                Environment.Exit(0);
+                                                break;
+                                        }
+                                    }
+                                    break;
+                                default:
+                                    Compilado += " " + "\"" + Tokens[Token + 1].Valor + "\"";
+                                    switch (Tokens[Token].Valor)
+                                    {
+                                        case "+":
+                                            Sumados = (Sumados.Valor + Tokens[Token + 1].Valor, "String");
+                                            break;
+                                        default:
+                                            //Caso de error
+                                            Environment.Exit(0);
+                                            break;
+                                    }
+                                    break;
+                            }
+                            Token += 2;
+
+                        }
+                        Avanzar(Token - Pos);
+                        return Sumados;
+                    }
+                }
+                //Termina OperarVVM
                 }
             //Fin void Perser
             }
@@ -997,4 +844,3 @@ namespace Chaos
     //Fin clase
     }
 //Fin namespace
-//LAS 1000 (Lamentablemente significa que esta mal optimizado)
