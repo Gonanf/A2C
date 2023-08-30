@@ -20,7 +20,7 @@ namespace Chaos
         static void Main(string[] args)
         {
             //DATOS DE SOFTWARE////////////
-            string Vercion = "0.0.4";    //
+            string Vercion = "0.0.6";    //
             string Edicion = "Estandar";   //
             //////////////////////////////
             //Lista de tokens, almacenaran las funciones y variable
@@ -46,7 +46,7 @@ namespace Chaos
                         {
                             Console.WriteLine("Ya esta instalado en el sistema");
                             Console.WriteLine($"La ruta a Arbys2Code es:\n{Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)}");
-                            Console.WriteLine("Arbys2Code Vercion " + Vercion);
+                            Console.WriteLine("Arbys2Code Vercion " + Vercion + " Edicion " + Edicion);
                             Console.ReadLine();
                             Environment.Exit(0);
                             break;
@@ -61,7 +61,7 @@ namespace Chaos
                     case "n":
                         //Si dijo que no, pues eso
                         Console.WriteLine($"La ruta a Arbys2Code es:\n{Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)}");
-                        Console.WriteLine("Arbys2Code Vercion " + Vercion);
+                        Console.WriteLine("Arbys2Code Vercion " + Vercion + " Edicion " + Edicion);
                         Console.ReadLine();
                         Environment.Exit(0);
                         break;
@@ -73,7 +73,7 @@ namespace Chaos
                         break;
                 }
 
-            //Si no hay argumentos suficientes
+                //Si no hay argumentos suficientes
             }
             if (args.Length != 2)
             {
@@ -124,6 +124,7 @@ namespace Chaos
                 Console.WriteLine("[ERROR] No existe el archivo especificado.");
                 Console.ReadLine();
             }
+
             //Empezar el tokenizador, devolvera tokens
             Tokenizador();
             //DEBUG: ver los tokens que procesa el tokenizador
@@ -137,11 +138,11 @@ namespace Chaos
             });
             Console.ForegroundColor = ConsoleColor.White;
             //Verificar que el codigo no tenga errores
-            Perser("Depurar","");
+            Perser("Depurar", "");
             //Si no tiene errores continuar normalmente
             if (Errores.Count == 0)
             {
-                Perser(args[0],Dir.Replace(".arb",""));
+                Perser(args[0], Dir.Replace(".arb", ""));
             }
             else //Si tiene errores mostrarlos
             {
@@ -161,7 +162,6 @@ namespace Chaos
                 string Codigo = string.Join(" ", File.ReadAllLines(Dir));
                 int Pos = 0;
                 string Texto = "";
-                string NumVal = "1234567890";
                 //Funciones validas
                 string[] Funciones = {
       "Imprimir",
@@ -175,8 +175,9 @@ namespace Chaos
       "-",
       "*",
       "/"};
+
                 //Mientras que la posicion del programa en los caracteres del codigo no supere la cantidad existente
-                while (Pos < Codigo.Length - 1)
+                while (Pos < Codigo.Length)
                 {
                     switch (Codigo[Pos])
                     {
@@ -227,7 +228,7 @@ namespace Chaos
                             {
                                 Tokens.Add((Texto, "Variable"));
                                 Texto = "";
-                               
+
                             }
                             Avanzar();
                             //Mientras que el usuario no cerro el string
@@ -251,32 +252,37 @@ namespace Chaos
                     //Termina switch
 
                 }
-                //Termina el while, añadir el ultimo caracter o guardar la ultima variable
-                if (Codigo[Pos] != ' ' && Codigo[Pos] != '<' && Codigo[Pos] != '>' && Texto != "\n" && Texto != "\r")
-                {
-                    Texto += Codigo[Pos];
-                }
-                //Si es una funcion
                 if (Funciones.Contains(Texto))
                 {
                     //Añadir con tipo funcion
                     Tokens.Add((Texto, "Funcion"));
                     Texto = "";
+                    Avanzar();
+                }
+                //Si no es una funcion y no esta vacio
+                else if (Texto != " " && Texto != string.Empty)
+                {
+                    //Si el texto es numerico
+                    if (EsNumerico())
+                    {
+                        //Añadirlo como entero
+                        Tokens.Add((Texto, "Entero"));
+                        Texto = "";
+                        Avanzar();
+                    }
+                    else
+                    {
+                        //Si no, es una variable
+                        Tokens.Add((Texto, "Variable"));
+                        Texto = "";
+                        Avanzar();
+                    }
 
-                    Avanzar();
                 }
-                //Si es numerico
-                if (EsNumerico())
+                else
                 {
-                    //Añadirlo como entero
-                    Tokens.Add((Texto, "Entero"));
+                    //Si el texto esta vacio, reiniciar e ignorar
                     Texto = "";
-                    Avanzar();
-                }
-                //Si no concuerda, guardar como variable del usuario
-                if (Texto != " " && Texto != string.Empty)
-                {
-                    Tokens.Add((Texto, "Variable"));
                 }
                 //FUNCION: detecta si un string solamente contiene numeros
                 bool EsNumerico()
@@ -293,11 +299,16 @@ namespace Chaos
                 //FUNCION: verifica que la posicion no se pase de la cantidad de caracteres en el codigo
                 void Avanzar()
                 {
-                    if (Pos < Codigo.Length - 1)
+                    if (Pos < Codigo.Length)
                     {
                         Pos++;
                     }
+                    else
+                    {
+                        Pos = Codigo.Length;
+                    }
                 }
+
                 //Termina funcion
             }
             //Termina tokenizador
@@ -357,6 +368,7 @@ namespace Chaos
                                     continue;
                                 //Si es un token Leer con tipo Funcion
                                 case "Leer":
+                                    ImprimirPorDebug("Letyed");
                                     switch (Valargs)
                                     {
                                         case "JIT":
@@ -384,13 +396,16 @@ namespace Chaos
                                 case "Repetir":
                                     //Por hacer
                                     continue;
-
+                                default:
+                                    Avanzar(1);
+                                    AñadirError("no es una funcion valida");
+                                    break;
                             }
                             break;
                         //Si el token es de tipo variable
-                             ////////////////////
-                            //ASIGNAR VARIABLE//
-                           ////////////////////
+                        ////////////////////
+                        //ASIGNAR VARIABLE//
+                        ////////////////////
                         case "Variable":
                             ImprimirPorDebug("Es variable");
                             //Si tiene tokens suficientes (Para el = y un asignador)
@@ -399,27 +414,30 @@ namespace Chaos
                                 //Si el siguiente token es una funcion
                                 if (Tokens[Pos + 1].Tipo == "Funcion" && Tokens[Pos + 1].Valor == "=")
                                 {
-                                    (string Valor, string Tipo) Resultado;
-                                    int PosNombre = Pos;
-                                    int Original = IndexVar(Tokens[Pos].Valor);
-                                    if (Original == -1)
+                                    int PosOriginal = Pos;
+                                    int Originla = IndexVar(Tokens[Pos].Valor);
+                                    Avanzar(2);
+                                    if(Originla != -1)
                                     {
-                                        Compilado += "var " + Tokens[Pos].Valor + " = ";
-                                        Resultado = OperarVVM(Tokens[Pos + 2], Pos + 2);
-                                        Variables.Add((Tokens[PosNombre].Valor,Resultado.Tipo,Resultado.Valor));
+                                        Compilado += Tokens[PosOriginal].Valor + " = ";
+                                        (string Valor, string Tipo) Result = OperacionM();
+                                        Variables[Originla] = (Variables[Originla].Nombre,Result.Tipo, Result.Valor);
+                                        Compilado += ";\n";
                                     }
                                     else
                                     {
-                                        Compilado += Tokens[Pos].Valor + " = ";
-                                        Resultado = OperarVVM(Tokens[Pos + 2], Pos + 2);
-                                        Variables[Original] = ((Variables[Original].Nombre, Resultado.Tipo, Resultado.Valor));
+                                        Compilado += "var " + Tokens[PosOriginal].Valor + " = ";
+                                        (string Valor, string Tipo) Result = OperacionM();
+                                        Variables.Add((Tokens[PosOriginal].Valor, Result.Tipo, Result.Valor));
+                                        Compilado += ";\n";
                                     }
-                                    Compilado += ";\n";
-                                     
-
 
                                 }
                                 //Termina el if del valor de token + 1
+                                else
+                                {
+                                    Avanzar(1);
+                                }
 
                             }//Si no hay tokens suficientes para declarar una variable
                             else
@@ -427,6 +445,7 @@ namespace Chaos
                                 ImprimirPorDebug("No existe tokens en tokens + 2");
                                 if (Valargs == "Depurar")
                                 {
+                                    AñadirError("No hay suficientes tokens para declarar la variable ");
                                     //aqui añade a la lista de errores este error
                                 }
                                 //situacion de error
@@ -465,7 +484,7 @@ namespace Chaos
                     }
                     Console.ForegroundColor = ConsoleColor.White;
                 }
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 ////////////////////
                 //     DEBUG      //
                 ////////////////////
@@ -590,13 +609,14 @@ namespace Chaos
 
                         }
                         else
-                        { 
+                        {
                             //Si no existe dar error
                             ImprimirPorDebug("No existe la variable a imprimir");
+                            AñadirError("No existe la variable a imprimir");
                             //Situacion de error
                             Environment.Exit(0);
                         }
-                    //Si el token a imprimir no es variable
+                        //Si el token a imprimir no es variable
                     }
                     else
                     {
@@ -628,219 +648,204 @@ namespace Chaos
                 void AñadirError(string mensaje)
                 {
                     Errores.Add((mensaje, Pos));
-                }
-                //OPERACION VVM
-                (string Valor, string Tipo) OperarVVM((string Valor, string Tipo) V1, int Token)
-                {
-                    if (!Operaciones.Contains(Tokens[Token + 1].Valor))
-                    {
-                        switch (V1.Tipo)
-                        {
-                            case "Funcion":
-                                if (V1.Valor == "Leer")
-                                {
-                                    Compilado += " System.Console.ReadLine()";
-                                    if (Valargs == "JIT" || Valargs == "Ambos")
-                                    {
-                                        Avanzar(Token + 1 - Pos);
-                                        return (Console.ReadLine(), "String");
-                                    }
-                                    else
-                                    {
-                                        Avanzar(Token + 1 - Pos);
-                                        return ("Loremp", "String");
-                                        
-                                    }
-                                }
-                                break;
-                            case "Variable":
-                                int Original = IndexVar(V1.Valor);
-                                if (Original == -1)
-                                {
-                                    //Situacion de error
-                                    Environment.Exit(0);
-                                }
-                                else
-                                {
-                                    Compilado += " " + Variables[Original].Nombre;
-                                    Avanzar(Token + 1 - Pos);
-                                    return (Variables[Original].Valor, Variables[Original].Tipo);
-                                }
-                                break;
-                        }
-                        return V1;
-                    }
-                    else
-                    {
-                        Token++;
-                        (string Valor, string Tipo) Sumados = V1;
-                        switch (V1.Tipo)
-                        {
-                            case "String":
-                                Compilado += " " + "\"" + V1.Valor + "\"";
-                                break;
-                            case "Funcion":
-                                if (V1.Valor == "Leer")
-                                {
-                                    Compilado += " System.Console.ReadLine()";
-                                    if (Valargs == "JIT" || Valargs == "Ambos")
-                                    {
-                                        string temp = Console.ReadLine();
-                                        Sumados = (temp, "String");
-                                    }
-                                }
-                                else
-                                {
-                                    //Situacion de error
-                                    Environment.Exit(0);
-                                }
-                                break;
-                            case "Variable":
-                                int Original = IndexVar(V1.Valor);
-                                if (Original != -1)
-                                {
-                                    Compilado += " " + V1.Valor;
-                                    Sumados = (Variables[Original].Valor, Variables[Original].Tipo);
-                                    break;
-                                }
-                                else
-                                {
-                                    Console.WriteLine("No existe var " + V1);
-                                    //Caso de error
-                                    Environment.Exit(0);
-                                }
-                                break;
-                            default:
-                                Compilado += " " + V1.Valor;
-                                break;
-                        }
-                        while (Operaciones.Contains(Tokens[Token].Valor))
-                        {
-                            Compilado += " " + Tokens[Token].Valor + " ";
-                            switch (Tokens[Token + 1].Tipo)
-                            {
-                                case "Funcion":
-                                    if (Tokens[Token + 1].Valor == "Leer")
-                                    {
-                                        //Situacion de error
-                                        Environment.Exit(0);
-                                    }
-                                    break;
-                                case "Variable":
-                                    int Nuevo = IndexVar(Tokens[Token + 1].Valor);
-                                    if (Nuevo == -1)
-                                    {
-                                        //Caso de error
-                                        Environment.Exit(0);
-                                    }
-                                    else if (Sumados.Tipo == "Entero" && Variables[Nuevo].Tipo == "Entero")
-                                    {
-                                        Compilado += " " + Variables[Nuevo].Nombre;
-                                        switch (Tokens[Token].Valor)
-                                        {
-                                            case "+":
-                                                Sumados = ((Int32.Parse(Sumados.Valor) + Int32.Parse(Variables[Nuevo].Valor)).ToString(), "Entero");
-                                                break;
-                                            case "-":
-                                                Sumados = ((Int32.Parse(Sumados.Valor) - Int32.Parse(Variables[Nuevo].Valor)).ToString(), "Entero");
-                                                break;
-                                            case "*":
-                                                Sumados = ((Int32.Parse(Sumados.Valor) * Int32.Parse(Variables[Nuevo].Valor)).ToString(), "Entero");
-                                                break;
-                                            case "/":
-                                                Sumados = ((Int32.Parse(Sumados.Valor) / Int32.Parse(Variables[Nuevo].Valor)).ToString(), "Entero");
-                                                break;
-                                            default:
-                                                //Caso de error
-                                                Environment.Exit(0);
-                                                break;
-                                        }
-                                        break;
-                                    }
-                                    else
-                                    {
-                                        Compilado += " " + Variables[Nuevo].Nombre;
-                                        switch (Tokens[Token].Valor)
-                                        {
-                                            case "+":
-                                                
-                                                Sumados = (Sumados.Valor + Variables[Nuevo].Valor, "String");
-                                                break;
-                                            default:
-                                                //Caso de error
-                                                Environment.Exit(0);
-                                                break;
-                                        }
+                    Console.WriteLine(mensaje);
+                    Console.ReadLine();
 
+                }
+
+                ////////////////////
+                //   OPERACION M  //
+                ////////////////////
+                (string Valor, string Tipo) OperacionM()
+                {
+                    (string Valor, string Tipo) Primero = Tokens[Pos];
+                    if (SiExisteTokens(2))
+                    {
+                        (string Valor, string Tipo) Sumador = Primero;
+                        if (Tokens[Pos + 1].Tipo == "Funcion" && Operaciones.Contains(Tokens[Pos + 1].Valor))
+                        {
+                            Sumador = PrimeroVal();
+                        }
+                        else
+                        {
+                            return PrimeroVal();
+                        }
+
+                        while (Tokens[Pos].Tipo == "Funcion" && Operaciones.Contains(Tokens[Pos].Valor) && Pos < Tokens.Count())
+                        {
+
+                            switch (Tokens[Pos + 1].Tipo)
+                            {
+                                case "String":
+                                    switch (Tokens[Pos].Valor)
+                                    {
+                                        case "+":
+                                            Sumador = (Sumador.Valor + Tokens[Pos + 1].Valor, "String");
+                                            Compilado += " " + Tokens[Pos].Valor + " " + "\"" + Tokens[Pos + 1].Valor + "\"";
+                                            break;
+                                        default:
+                                            Avanzar(1);
+                                            AñadirError("Solo se puede sumar string");
+                                            break;
                                     }
                                     break;
                                 case "Entero":
-                                    if (Sumados.Tipo == "Entero")
+                                    if (Sumador.Tipo == "Entero")
                                     {
-                                        Compilado += " " + Tokens[Token + 1].Valor;
-                                        switch (Tokens[Token].Valor)
+                                        Compilado += " " + Tokens[Pos].Valor + " " + Tokens[Pos + 1].Valor;
+                                        switch (Tokens[Pos].Valor)
                                         {
                                             case "+":
-                                                Sumados = ((Int32.Parse(Sumados.Valor) + Int32.Parse(Tokens[Token + 1].Valor)).ToString(), "Entero");
+                                                Sumador = ((Int32.Parse(Sumador.Valor) + Int32.Parse(Tokens[Pos + 1].Valor)).ToString(), "Entero");
                                                 break;
                                             case "-":
-                                                Sumados = ((Int32.Parse(Sumados.Valor) - Int32.Parse(Tokens[Token + 1].Valor)).ToString(), "Entero");
+                                                Sumador = ((Int32.Parse(Sumador.Valor) - Int32.Parse(Tokens[Pos + 1].Valor)).ToString(), "Entero");
                                                 break;
                                             case "*":
-                                                Sumados = ((Int32.Parse(Sumados.Valor) * Int32.Parse(Tokens[Token + 1].Valor)).ToString(), "Entero");
+                                                Sumador = ((Int32.Parse(Sumador.Valor) * Int32.Parse(Tokens[Pos + 1].Valor)).ToString(), "Entero");
                                                 break;
                                             case "/":
-                                                Sumados = ((Int32.Parse(Sumados.Valor) / Int32.Parse(Tokens[Token + 1].Valor)).ToString(), "Entero");
+                                                Sumador = ((Int32.Parse(Sumador.Valor) / Int32.Parse(Tokens[Pos + 1].Valor)).ToString(), "Entero");
                                                 break;
                                             default:
-                                                //Caso de error
-                                                Environment.Exit(0);
+                                                Avanzar(1);
+                                                AñadirError("Caracter operacion invalido");
                                                 break;
                                         }
-                                        break;
+                                    }
+                                    break;
+                                case "Variable":
+                                    int Nuevo = IndexVar(Tokens[Pos + 1].Valor);
+                                    if (Nuevo != -1)
+                                    {
+                                        if (Variables[Nuevo].Tipo == "Entero" && Sumador.Tipo == "Entero")
+                                        {
+                                            Compilado += " " + Tokens[Pos].Valor + " " + Variables[Nuevo].Valor;
+                                            switch (Tokens[Pos].Valor)
+                                            {
+                                                case "+":
+                                                    Sumador = ((Int32.Parse(Sumador.Valor) + Int32.Parse(Variables[Nuevo].Valor)).ToString(), "Entero");
+                                                    break;
+                                                case "-":
+                                                    Sumador = ((Int32.Parse(Sumador.Valor) - Int32.Parse(Variables[Nuevo].Valor)).ToString(), "Entero");
+                                                    break;
+                                                case "*":
+                                                    Sumador = ((Int32.Parse(Sumador.Valor) * Int32.Parse(Variables[Nuevo].Valor)).ToString(), "Entero");
+                                                    break;
+                                                case "/":
+                                                    Sumador = ((Int32.Parse(Sumador.Valor) / Int32.Parse(Variables[Nuevo].Valor)).ToString(), "Entero");
+                                                    break;
+                                                default:
+                                                    Avanzar(1);
+                                                    AñadirError("Caracter operacion invalido");
+                                                    break;
+                                            }
+
+                                        }
+                                        else
+                                        {
+                                            switch (Tokens[Pos].Valor)
+                                            {
+                                                case "+":
+                                                    Sumador = (Sumador.Valor + Variables[Nuevo].Valor, "String");
+                                                    Compilado += " " + Tokens[Pos].Valor + " " + Variables[Nuevo].Nombre;
+                                                    break;
+                                                default:
+                                                    Avanzar(1);
+                                                    AñadirError("Solo se puede sumar string");
+                                                    break;
+                                            }
+                                        }
                                     }
                                     else
                                     {
-                                        Compilado += " " + "\"" + Tokens[Token + 1].Valor + "\"";
-                                        switch (Tokens[Token].Valor)
-                                        {
-                                            case "+":
-                                                Sumados = (Sumados.Valor + Tokens[Token + 1].Valor, "String");
-                                                break;
-                                            default:
-                                                //Caso de error
-                                                Environment.Exit(0);
-                                                break;
-                                        }
+                                        Avanzar(1);
+                                        AñadirError("No puedes asignar una variable no declarada");
                                     }
+                                    break;
+                                case "Funcion":
+                                    Avanzar(1);
+                                    AñadirError("No se puede operar con una funcion");
                                     break;
                                 default:
-                                    Compilado += " " + "\"" + Tokens[Token + 1].Valor + "\"";
-                                    switch (Tokens[Token].Valor)
-                                    {
-                                        case "+":
-                                            Sumados = (Sumados.Valor + Tokens[Token + 1].Valor, "String");
-                                            break;
-                                        default:
-                                            //Caso de error
-                                            Environment.Exit(0);
-                                            break;
-                                    }
+                                    Avanzar(1);
+                                    AñadirError("No se puede operar con otro tipo ademas de string, entero y funcion");
                                     break;
                             }
-                            Token += 2;
-
+                            
+                            if (SiExisteTokens(2))
+                            {
+                                Avanzar(2);
+                            }
+                            else
+                            {
+                                Avanzar(2);
+                                return Sumador;
+                            }
                         }
-                        Avanzar(Token - Pos);
-                        return Sumados;
+                        return Sumador;
                     }
+                    else
+                    {
+                        return PrimeroVal();
+                    }
+                    (string Valor, string Tipo) PrimeroVal()
+                    {
+                        if (Primero.Tipo == "Variable")
+                        {
+                            int Nuevo = IndexVar(Primero.Valor);
+                            if (Nuevo != -1)
+                            {
+                                Avanzar(1);
+                                Compilado += " " + Variables[Nuevo].Nombre;
+                                return (Variables[Nuevo].Valor, Variables[Nuevo].Tipo);
+                            }
+                            else
+                            {
+                                Avanzar(1);
+                                AñadirError("Esta asignando una variable no declarada");
+                            }
+                        }
+                        else if (Primero.Tipo == "String")
+                        {
+                            Compilado += " " + "\"" + Primero.Valor + "\"";
+                            Avanzar(1);
+                            return (Primero.Valor, Primero.Tipo);
+                        }
+                        else if (Primero.Tipo == "Funcion")
+                        {
+                            if (Primero.Valor == "Leer")
+                            {
+                                string temp = "loremp";
+                                Avanzar(1);
+                                if (Valargs == "JIT" || Valargs == "Ambos")
+                                {
+                                    Console.ForegroundColor = ConsoleColor.Blue;
+                                    temp = Console.ReadLine();
+                                    Console.ForegroundColor = ConsoleColor.White;
+                                }
+                                Compilado += " System.Console.ReadLine()";
+                                return (temp, "String");
+                                
+                            }
+                            else
+                            {
+                                Avanzar(1);
+                                AñadirError("La unica funcion que se le puede asignar a una variable es la funcion Leer");
+                                return ("", "");
+                            }
+                        }
+                            Avanzar(1);
+                            Compilado += " " + Primero.Valor;
+                            return (Primero.Valor, Primero.Tipo);
+                    }
+
                 }
-                //Termina OperarVVM
-                }
-            //Fin void Perser
             }
-        //Fin main
+            //Fin void Perser
         }
-    //Fin clase
+        //Fin main
     }
+    //Fin clase
+}
 //Fin namespace
