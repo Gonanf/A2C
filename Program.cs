@@ -116,6 +116,8 @@ namespace Chaos
                 else //Si no lo encuentra
                 {
                     Console.WriteLine("Archivo.arb no encontrado");
+                    Console.ReadLine();
+                    Environment.Exit(0);
                 }
 
             }//Si no se encontro el directorio (Muy raro)
@@ -123,6 +125,7 @@ namespace Chaos
             {
                 Console.WriteLine("[ERROR] No existe el archivo especificado.");
                 Console.ReadLine();
+                Environment.Exit(0);
             }
 
             //Empezar el tokenizador, devolvera tokens
@@ -164,17 +167,22 @@ namespace Chaos
                 string Texto = "";
                 //Funciones validas
                 string[] Funciones = {
-      "Imprimir",
-      "Leer",
-      "Si",
-      "Mientras",
-      "Repetir",
-      "Fin",
-      "=",
-      "+",
-      "-",
-      "*",
-      "/"};
+                "Imprimir",
+                "Leer",
+                "Si",
+                "Mientras",
+                "Repetir",
+                "Fin",
+                "=",
+                "+",
+                "-",
+                "*",
+                "/",
+                "(",
+                ")",
+                "<",
+                ">",
+                "!"};
 
                 //Mientras que la posicion del programa en los caracteres del codigo no supere la cantidad existente
                 while (Pos < Codigo.Length)
@@ -205,6 +213,14 @@ namespace Chaos
                                     Avanzar();
                                     break;
                                 }
+                                else if (Texto == "Verdadero" || Texto == "Falso")
+                                {
+                                    //Si es un boleeano
+                                    Tokens.Add((Texto, "Booleano"));
+                                    Texto = "";
+                                    Avanzar();
+                                    break; 
+                                }
                                 else
                                 {
                                     //Si no, es una variable
@@ -222,17 +238,17 @@ namespace Chaos
                                 Texto = "";
                             }
                             break;
-                        case '<':
+                        case '|':
                             //Si inicia un string, guardar todo token que aun no se guardo
                             if (Texto != " " && Texto != string.Empty)
                             {
-                                Tokens.Add((Texto, "Variable"));
-                                Texto = "";
-
+                                Console.WriteLine("Los tokens no deben estar juntos");
+                                Console.ReadLine();
+                                Environment.Exit(0);
                             }
                             Avanzar();
                             //Mientras que el usuario no cerro el string
-                            while (Codigo[Pos] != '>')
+                            while (Codigo[Pos] != '|')
                             {
                                 //Obtener y guardar sus caracteres
                                 Texto += Codigo[Pos];
@@ -267,6 +283,13 @@ namespace Chaos
                     {
                         //Añadirlo como entero
                         Tokens.Add((Texto, "Entero"));
+                        Texto = "";
+                        Avanzar();
+                    }
+                    else if (Texto == "Verdadero" || Texto == "Falso")
+                    {
+                        //Si es un boleeano
+                        Tokens.Add((Texto, "Booleano"));
                         Texto = "";
                         Avanzar();
                     }
@@ -320,10 +343,14 @@ namespace Chaos
                 string Operaciones = "+-*/";
                 int Pos = 0;
                 //Las primeras lineas en la traduccion de A2C a C#
-                string Compilado = "using System;\n" +
+                string Compilado = "using System;\n"+
                     "namespace Chaos {\n" +
                     "class A2C {\n" +
                     "static void Main(){\n";
+                int Contador = 0;
+                bool Invalido = false;
+                List<int> UltVar = new List<int>();
+                List<bool> Validacion = new List<bool>();
                 //CodeDOM
                 CSharpCodeProvider CodProv = new CSharpCodeProvider();
                 CompilerParameters Param = new CompilerParameters();
@@ -354,41 +381,79 @@ namespace Chaos
                                     //Si hay tokens suficientes
                                     if (SiExisteTokens(1))
                                     {
+                                        
                                         ImprimirPorDebug("Imprimiendo");
+                                        Avanzar(1);
+
+                                        Compilado += "System.Console.WriteLine(";
+                                        (string Valor, string Tipo) Resultado = OperacionM();
                                         //Imprimir el siguiente token (A mejorar con la suma)
-                                        Imprimir(Tokens[Pos + 1].Valor, Tokens[Pos + 1].Tipo);
-                                        Avanzar(2);
-                                        ImprimirPorDebug("Avanzado 2");
+                                        if (Valargs == "JIT" || Valargs == "Ambos")
+                                        {
+                                            if (Invalido == false) { Console.WriteLine(Resultado.Valor); }
+                                            
+                                        }
+                                        Compilado += ");\n";
                                     }
                                     else
                                     {
+                                        Avanzar(1);
+                                        AñadirError("No hay suficientes tokens para imprimir");
                                         //situacion de error
-                                        Environment.Exit(0);
                                     }
                                     continue;
                                 //Si es un token Leer con tipo Funcion
                                 case "Leer":
                                     ImprimirPorDebug("Letyed");
-                                    switch (Valargs)
+                                    if (Invalido == true)
                                     {
-                                        case "JIT":
-                                            ImprimirPorDebug("JIT Leyendo");
-                                            Console.ReadLine();
-                                            break;
-                                        case "CMP":
-                                            ImprimirPorDebug("CMP compilando");
-                                            Compilado += "System.Console.ReadLine();\n";
-                                            break;
-                                        case "Ambos":
-                                            ImprimirPorDebug("Ambos Leyendo y Compilando");
-                                            Console.ReadLine();
-                                            Compilado += "System.Console.ReadLine();\n";
-                                            break;
+                                        switch (Valargs)
+                                        {
+                                            case "JIT":
+                                                ImprimirPorDebug("JIT Leyendo");
+                                                Console.ReadLine();
+                                                break;
+                                            case "CMP":
+                                                ImprimirPorDebug("CMP compilando");
+                                                Compilado += "System.Console.ReadLine();\n";
+                                                break;
+                                            case "Ambos":
+                                                ImprimirPorDebug("Ambos Leyendo y Compilando");
+                                                Console.ReadLine();
+                                                Compilado += "System.Console.ReadLine();\n";
+                                                break;
+                                        }
                                     }
+
                                     Avanzar(1);
                                     continue;
                                 case "Si":
-                                    //Por hacer
+                                    if (SiExisteTokens(5))
+                                    {
+                                        Avanzar(1);
+                                        Contador++;
+                                        Compilado += "if (";
+                                        if (FuncionSi())
+                                        {
+                                                Validacion.Add(false);
+                                            Avanzar(1);
+                                        }
+                                        else
+                                        {
+                                                Validacion.Add(true);
+                                            Invalido = true;
+                                            Avanzar(1);
+                                        }
+                                            UltVar.Add(Variables.Count());
+                                            Compilado += ")\n{\n";
+
+                                    }
+                                    else
+                                    {
+                                        Avanzar(1);
+                                        AñadirError("No existe tokens suficientes para la funcion Si");
+                                        continue;
+                                    }
                                     continue;
                                 case "Mientras":
                                     //Por hacer
@@ -396,6 +461,41 @@ namespace Chaos
                                 case "Repetir":
                                     //Por hacer
                                     continue;
+                                case ")":
+                                    Compilado += "\n}\n";
+                                    if (Contador == 1)
+                                    {
+                                        
+                                        Contador--;
+                                        Invalido = false;
+                                        for (int i = UltVar.Last(); i < Variables.Count(); i++)
+                                        {
+                                            Variables.RemoveAt(i);
+                                        }
+                                        UltVar.RemoveAt(UltVar.Count()-1);
+                                        Validacion.Remove(Validacion.Last());
+                                    }
+                                    else
+                                    {
+                                        if (Invalido == true && Validacion[0] == false)
+                                        {
+                                            Invalido = false;
+                                            Contador--;
+                                            Validacion.Remove(Validacion.Last());
+                                            for (int i = UltVar.Last(); i < Variables.Count(); i++)
+                                            {
+                                                Variables.RemoveAt(i);
+                                            }
+                                            UltVar.RemoveAt(UltVar.Count() - 1);
+                                        }
+                                        else
+                                        {
+                                            Contador--;
+                                        }
+                                    }
+                                    
+                                    Avanzar(1);
+                                    break;
                                 default:
                                     Avanzar(1);
                                     AñadirError("no es una funcion valida");
@@ -419,14 +519,14 @@ namespace Chaos
                                     Avanzar(2);
                                     if(Originla != -1)
                                     {
-                                        Compilado += Tokens[PosOriginal].Valor + " = ";
+                                        Compilado += Tokens[PosOriginal].Valor + " =";
                                         (string Valor, string Tipo) Result = OperacionM();
                                         Variables[Originla] = (Variables[Originla].Nombre,Result.Tipo, Result.Valor);
                                         Compilado += ";\n";
                                     }
                                     else
                                     {
-                                        Compilado += "var " + Tokens[PosOriginal].Valor + " = ";
+                                        Compilado += "var " + Tokens[PosOriginal].Valor + " =";
                                         (string Valor, string Tipo) Result = OperacionM();
                                         Variables.Add((Tokens[PosOriginal].Valor, Result.Tipo, Result.Valor));
                                         Compilado += ";\n";
@@ -437,6 +537,7 @@ namespace Chaos
                                 else
                                 {
                                     Avanzar(1);
+                                    AñadirError("Esta bien declarado la varible");
                                 }
 
                             }//Si no hay tokens suficientes para declarar una variable
@@ -453,6 +554,10 @@ namespace Chaos
                                 continue;
                             }
                             continue;
+                        default:
+                            Avanzar(1);
+                            AñadirError("El tipo del token no es valido");
+                            break;
 
                     }
                     //Termina switch principal
@@ -573,73 +678,7 @@ namespace Chaos
                     }
                 }
                 //Fin IndexVar
-                //Imprime valores
-                ////////////////////
-                //    IMPRIMIR    //
-                ////////////////////
-                void Imprimir(string Valor, string Tipo)
-                {
-                    //Si el valor a imprimir es una variable
-                    if (Tipo == "Variable")
-                    {
-                        ImprimirPorDebug("Es variable");
-                        //Verificar que exista
-                        int Actual = IndexVar(Valor);
-                        if (Actual != -1)
-                        {
-                            //Si existe
-                            ImprimirPorDebug(Variables[Actual] + " Existe");
-                            //Imprimir su valor
-                            switch (Valargs)
-                            {
-                                case "JIT":
-                                    ImprimirPorDebug("JIT imprimiendo variable");
-                                    Console.WriteLine(Variables[Actual].Valor);
-                                    break;
-                                case "CMP":
-                                    ImprimirPorDebug("CMP compilando imprimiendo variable");
-                                    Compilado += " System.Console.WriteLine(" + Variables[Actual].Nombre + "); \n";
-                                    break;
-                                case "Ambos":
-                                    ImprimirPorDebug("Ambos compilando e imprimiendo variable");
-                                    Console.WriteLine(Variables[Actual].Valor);
-                                    Compilado += " System.Console.WriteLine(" + Variables[Actual].Nombre + ");\n";
-                                    break;
-                            }
 
-                        }
-                        else
-                        {
-                            //Si no existe dar error
-                            ImprimirPorDebug("No existe la variable a imprimir");
-                            AñadirError("No existe la variable a imprimir");
-                            //Situacion de error
-                            Environment.Exit(0);
-                        }
-                        //Si el token a imprimir no es variable
-                    }
-                    else
-                    {
-                        //Debe ser o Entero o String
-                        switch (Valargs)
-                        {
-                            case "JIT":
-                                ImprimirPorDebug("JIT imprimir valor");
-                                Console.WriteLine(Valor);
-                                break;
-                            case "CMP":
-                                ImprimirPorDebug("CMP compilar imprimir valor");
-                                Compilado += " System.Console.WriteLine(\"" + Valor + "\");\n";
-                                break;
-                            case "Ambos":
-                                ImprimirPorDebug("Ambos compilar e imprimir valor");
-                                Console.WriteLine(Valor);
-                                Compilado += " System.Console.WriteLine(\"" + Valor + "\");\n";
-                                break;
-                        }
-                    }
-                    //Situacion de error
-                }
                 //Termina imprimir
                 //Añadir error: una manera facil de añadir un mensaje de error
                 ////////////////////
@@ -818,7 +857,7 @@ namespace Chaos
                             {
                                 string temp = "loremp";
                                 Avanzar(1);
-                                if (Valargs == "JIT" || Valargs == "Ambos")
+                                if (Valargs == "JIT" || Valargs == "Ambos" && Invalido == false)
                                 {
                                     Console.ForegroundColor = ConsoleColor.Blue;
                                     temp = Console.ReadLine();
@@ -835,11 +874,143 @@ namespace Chaos
                                 return ("", "");
                             }
                         }
+                        else if (Primero.Tipo == "Entero")
+                        {
                             Avanzar(1);
                             Compilado += " " + Primero.Valor;
                             return (Primero.Valor, Primero.Tipo);
+                        }
+                        else
+                        {
+                            Avanzar(1);
+                            switch (Primero.Valor)
+                            {
+                                case "Verdadero":
+                                    Compilado += " " + "true";
+                                    return (Primero.Valor, Primero.Tipo);
+                                case "Falso":
+                                    Compilado += " " + "false";
+                                    return (Primero.Valor, Primero.Tipo);
+                            }
+                            
+                            
+                        }
+                        Avanzar(1);
+                        Compilado += " " + Primero.Valor;
+                        return (Primero.Valor, Primero.Tipo);
+
                     }
 
+                }
+                bool FuncionSi()
+                {
+                    (string Valor, string Tipo) Primero = OperacionM();
+                    string Funcion = Tokens[Pos].Valor;
+                    switch (Funcion)
+                    {
+                        case "<":
+                            Compilado += " <";
+                            break;
+                        case ">":
+                            Compilado += " >";
+                            break;
+                        case "=":
+                            Compilado += " ==";
+                            break;
+                        case "!":
+                            Compilado += " !=";
+                            break;
+                        default:
+                            Avanzar(1);
+                            AñadirError("Operacion logica no valida");
+                            break;
+                    }
+                    Avanzar(1);
+                    (string Valor, string Tipo) Segundo = OperacionM();
+                    switch (Funcion)
+                    {
+                        case "<":
+                           if(Primero.Tipo == "Entero" && Segundo.Tipo == "Entero")
+                            {
+                                if (Int32.Parse(Primero.Valor) < Int32.Parse(Segundo.Valor))
+                                {
+                                    return true;
+                                }
+                                else
+                                {
+                                    return false;
+                                }
+                            }
+                            else
+                            {
+                                Avanzar(1);
+                                AñadirError("No se puede operar logicamente con otro tipo ademas de entero");
+                                return false;
+                            }
+                            break;
+                        case ">":
+                            if (Primero.Tipo == "Entero" && Segundo.Tipo == "Entero")
+                            {
+                                if (Int32.Parse(Primero.Valor) > Int32.Parse(Segundo.Valor))
+                                {
+                                    return true;
+                                }
+                                else
+                                {
+                                    return false;
+                                }
+                            }
+                            else
+                            {
+                                Avanzar(1);
+                                AñadirError("No se puede operar logicamente con otro tipo ademas de entero");
+                                return false;
+                            }
+                            break;
+                        case "=":
+                            if (Primero.Tipo == "Entero" && Segundo.Tipo == "Entero")
+                            {
+                                if (Int32.Parse(Primero.Valor) == Int32.Parse(Segundo.Valor))
+                                {
+                                    return true;
+                                }
+                                else
+                                {
+                                    return false;
+                                }
+                            }
+                            else
+                            {
+                                Avanzar(1);
+                                AñadirError("No se puede operar logicamente con otro tipo ademas de entero");
+                                return false;
+                            }
+                            break;
+                        case "!":
+                            if (Primero.Tipo == "Entero" && Segundo.Tipo == "Entero")
+                            {
+                                if (Int32.Parse(Primero.Valor) != Int32.Parse(Segundo.Valor))
+                                {
+                                    return true;
+                                }
+                                else
+                                {
+                                    return false;
+                                }
+                            }
+                            else
+                            {
+                                Avanzar(1);
+                                AñadirError("No se puede operar logicamente con otro tipo ademas de entero");
+                                return false;
+                            }
+                            break;
+                        default:
+                            Avanzar(1);
+                            AñadirError("No es una opcion valida " + Funcion);
+                            return false;
+                            break;
+                    }
                 }
             }
             //Fin void Perser
