@@ -20,7 +20,7 @@ namespace Chaos
         static void Main(string[] args)
         {
             //DATOS DE SOFTWARE////////////
-            string Vercion = "0.0.6";    //
+            string Vercion = "0.0.8";    //
             string Edicion = "Estandar";   //
             //////////////////////////////
             //Lista de tokens, almacenaran las funciones y variable
@@ -465,7 +465,6 @@ namespace Chaos
                                     Compilado += "\n}\n";
                                     if (Contador == 1)
                                     {
-                                        
                                         Contador--;
                                         Invalido = false;
                                         for (int i = UltVar.Last(); i < Variables.Count(); i++)
@@ -473,15 +472,15 @@ namespace Chaos
                                             Variables.RemoveAt(i);
                                         }
                                         UltVar.RemoveAt(UltVar.Count()-1);
-                                        Validacion.Remove(Validacion.Last());
+                                        Validacion.RemoveAt(Validacion.Count() - 1);
                                     }
                                     else
                                     {
-                                        if (Invalido == true && Validacion[0] == false)
+                                        if (Invalido == true && !Validacion.Contains(false))
                                         {
                                             Invalido = false;
                                             Contador--;
-                                            Validacion.Remove(Validacion.Last());
+                                            Validacion.RemoveAt(Validacion.Count() - 1);
                                             for (int i = UltVar.Last(); i < Variables.Count(); i++)
                                             {
                                                 Variables.RemoveAt(i);
@@ -490,10 +489,13 @@ namespace Chaos
                                         }
                                         else
                                         {
+                                            Invalido = false;
                                             Contador--;
+                                            UltVar.RemoveAt(UltVar.Count() - 1);
+                                            Validacion.RemoveAt(Validacion.Count() - 1);
                                         }
                                     }
-                                    
+
                                     Avanzar(1);
                                     break;
                                 default:
@@ -537,7 +539,7 @@ namespace Chaos
                                 else
                                 {
                                     Avanzar(1);
-                                    AñadirError("Esta bien declarado la varible");
+                                    AñadirError("No esta bien declarado la varible " + Tokens[Pos]);
                                 }
 
                             }//Si no hay tokens suficientes para declarar una variable
@@ -979,10 +981,26 @@ namespace Chaos
                                     return false;
                                 }
                             }
+                            else if (Primero.Tipo == "Booleano" && Segundo.Tipo == "Booleano")
+                            {
+                                if (Primero.Valor == Segundo.Valor)
+                                {
+                                    return true;
+                                }
+                                else { return false; }
+                            }
+                            else if(Primero.Tipo == "String" && Segundo.Tipo == "String")
+                            {
+                                if (Primero.Valor == Segundo.Valor)
+                                {
+                                    return true;
+                                }
+                                else { return false; }
+                            }
                             else
                             {
                                 Avanzar(1);
-                                AñadirError("No se puede operar logicamente con otro tipo ademas de entero");
+                                AñadirError("No se puede operar logicamente");
                                 return false;
                             }
                             break;
@@ -998,10 +1016,26 @@ namespace Chaos
                                     return false;
                                 }
                             }
+                            else if (Primero.Tipo == "Booleano" && Segundo.Tipo == "Booleano")
+                            {
+                                if (Primero.Valor != Segundo.Valor)
+                                {
+                                    return true;
+                                }
+                                else { return false; }
+                            }
+                            else if (Primero.Tipo == "String" && Segundo.Tipo == "String")
+                            {
+                                if (Primero.Valor != Segundo.Valor)
+                                {
+                                    return true;
+                                }
+                                else { return false; }
+                            }
                             else
                             {
                                 Avanzar(1);
-                                AñadirError("No se puede operar logicamente con otro tipo ademas de entero");
+                                AñadirError("No se puede operar logicamente");
                                 return false;
                             }
                             break;
