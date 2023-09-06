@@ -347,9 +347,8 @@ namespace Chaos
                     "namespace Chaos {\n" +
                     "class A2C {\n" +
                     "static void Main(){\n";
-                int Contador = 0;
-                bool Invalido = false;
-                List<int> UltVar = new List<int>();
+                List<int> Posicion = new List<int>();
+                List<int> LocVars = new List<int>();
                 List<bool> Validacion = new List<bool>();
                 //CodeDOM
                 CSharpCodeProvider CodProv = new CSharpCodeProvider();
@@ -388,9 +387,9 @@ namespace Chaos
                                         Compilado += "System.Console.WriteLine(";
                                         (string Valor, string Tipo) Resultado = OperacionM();
                                         //Imprimir el siguiente token (A mejorar con la suma)
-                                        if (Valargs == "JIT" || Valargs == "Ambos")
+                                        if (Valargs != "CMP" && Valargs != "Depurar")
                                         {
-                                            if (Invalido == false) { Console.WriteLine(Resultado.Valor); }
+                                            if (!Validacion.Contains(false)) { Console.WriteLine(Resultado.Valor); }
                                             
                                         }
                                         Compilado += ");\n";
@@ -405,24 +404,16 @@ namespace Chaos
                                 //Si es un token Leer con tipo Funcion
                                 case "Leer":
                                     ImprimirPorDebug("Letyed");
-                                    if (Invalido == true)
+                                    if (!Validacion.Contains(false))
                                     {
-                                        switch (Valargs)
+                                        if (Valargs != "Depurar" && Valargs != "CMP")
                                         {
-                                            case "JIT":
-                                                ImprimirPorDebug("JIT Leyendo");
-                                                Console.ReadLine();
-                                                break;
-                                            case "CMP":
-                                                ImprimirPorDebug("CMP compilando");
-                                                Compilado += "System.Console.ReadLine();\n";
-                                                break;
-                                            case "Ambos":
-                                                ImprimirPorDebug("Ambos Leyendo y Compilando");
-                                                Console.ReadLine();
-                                                Compilado += "System.Console.ReadLine();\n";
-                                                break;
+                                            ImprimirPorDebug("Ambos Leyendo y Compilando");
+                                            Console.ReadLine();
+                                            
                                         }
+                                        Compilado += "System.Console.ReadLine();\n";
+
                                     }
 
                                     Avanzar(1);
@@ -431,20 +422,18 @@ namespace Chaos
                                     if (SiExisteTokens(5))
                                     {
                                         Avanzar(1);
-                                        Contador++;
                                         Compilado += "if (";
                                         if (FuncionSi())
                                         {
-                                                Validacion.Add(false);
+                                                Validacion.Add(true);
                                             Avanzar(1);
                                         }
                                         else
                                         {
-                                                Validacion.Add(true);
-                                            Invalido = true;
+                                                Validacion.Add(false);
                                             Avanzar(1);
                                         }
-                                            UltVar.Add(Variables.Count());
+                                            LocVars.Add(Variables.Count());
                                             Compilado += ")\n{\n";
 
                                     }
@@ -463,38 +452,12 @@ namespace Chaos
                                     continue;
                                 case ")":
                                     Compilado += "\n}\n";
-                                    if (Contador == 1)
+                                    for (int i = LocVars.Last(); i < Variables.Count(); i++)
                                     {
-                                        Contador--;
-                                        Invalido = false;
-                                        for (int i = UltVar.Last(); i < Variables.Count(); i++)
-                                        {
-                                            Variables.RemoveAt(i);
-                                        }
-                                        UltVar.RemoveAt(UltVar.Count()-1);
-                                        Validacion.RemoveAt(Validacion.Count() - 1);
+                                        Variables.RemoveAt(i);
                                     }
-                                    else
-                                    {
-                                        if (Invalido == true && !Validacion.Contains(false))
-                                        {
-                                            Invalido = false;
-                                            Contador--;
-                                            Validacion.RemoveAt(Validacion.Count() - 1);
-                                            for (int i = UltVar.Last(); i < Variables.Count(); i++)
-                                            {
-                                                Variables.RemoveAt(i);
-                                            }
-                                            UltVar.RemoveAt(UltVar.Count() - 1);
-                                        }
-                                        else
-                                        {
-                                            Invalido = false;
-                                            Contador--;
-                                            UltVar.RemoveAt(UltVar.Count() - 1);
-                                            Validacion.RemoveAt(Validacion.Count() - 1);
-                                        }
-                                    }
+                                    LocVars.RemoveAt(LocVars.Count() - 1);
+                                    Validacion.RemoveAt(Validacion.Count() - 1);
 
                                     Avanzar(1);
                                     break;
@@ -859,7 +822,7 @@ namespace Chaos
                             {
                                 string temp = "loremp";
                                 Avanzar(1);
-                                if (Valargs == "JIT" || Valargs == "Ambos" && Invalido == false)
+                                if (Valargs != "CMP" && Valargs != "Depurar" && !Validacion.Contains(false))
                                 {
                                     Console.ForegroundColor = ConsoleColor.Blue;
                                     temp = Console.ReadLine();
