@@ -419,7 +419,7 @@ namespace Chaos
                                         Compilado += "System.Console.ReadLine();\n";
 
                                     }
-
+                                    ImprimirPorDebug("Leyendo");
                                     Avanzar(1);
                                     continue;
                                 case "Si":
@@ -436,7 +436,6 @@ namespace Chaos
                                         {
                                             Validacion.Add(false);
                                         }
-                                        LocVars.Add(Variables.Count());
                                         Compilado += ")\n{\n";
 
                                     }
@@ -456,14 +455,18 @@ namespace Chaos
                                 case ")":
 
                                     Compilado += "\n}\n";
-                                    LocVars.RemoveAt(LocVars.Count() - 1);
-                                    Validacion.RemoveAt(Validacion.Count() - 1);
-
+                                    if (Validacion.Count > 0)
+                                    {
+                                        Validacion.RemoveAt(Validacion.Count() - 1);
+                                    }
                                     Avanzar(1);
                                     break;
                                 default:
-                                    Avanzar(1);
                                     AñadirError("no es una funcion valida");
+                                    Avanzar(1);
+                                    break;
+                                case "(":
+                                    Avanzar(1);
                                     break;
                             }
                             ImprimirPorDebug("Wahtafas");
@@ -900,30 +903,51 @@ namespace Chaos
                         ImprimirPorDebug("Hay toknes para los ¿e sii");
                         bool Sumador = FuncionSi();
                         ImprimirPorDebug("Se hizo la primera operacion logica");
-                        Avanzar(1);
                         if (Tokens[Pos].Valor == "Y" || Tokens[Pos].Valor == "O")
                         {
-
-                            while (Tokens[Pos].Valor == "Y" || Tokens[Pos].Valor == "O")
+                            switch (Tokens[Pos].Valor)
                             {
+                                case "Y":
+                                    Compilado += " && ";
+                                    break;
+                                case "O":
+                                    Compilado += " || ";
+                                    break;
+                            }
+                            string Operador = Tokens[Pos].Valor;
+                            Avanzar(1);
+                            while (Operador == "Y" || Operador == "O")
+                            {
+
+                                bool Resultado = FuncionSi();
                                 switch (Tokens[Pos].Valor)
                                 {
                                     case "Y":
                                         Compilado += " && ";
-                                        Avanzar(1);
-                                        if (Sumador == FuncionSi())
+                                        break;
+                                    case "O":
+                                        Compilado += " || ";
+                                        break;
+                                }
+                                switch (Tokens[Pos].Valor)
+                                {
+                                    case "Y":
+
+                                        ImprimirPorDebug("Es Y");
+                                        if (Sumador == Resultado)
                                         {
+                                            ImprimirPorDebug("Sumador es igual a nuevo ");
                                             Sumador = true;
                                         }
                                         else
                                         {
+                                            ImprimirPorDebug("Sumador no es igual a nuevo ");
                                             Sumador = false;
                                         }
                                         break;
                                     case "O":
-                                        Compilado += " || ";
-                                        Avanzar(1);
-                                        if (Sumador || FuncionSi())
+
+                                        if (Sumador || Resultado)
                                         {
                                             Sumador = true;
                                         }
@@ -933,12 +957,16 @@ namespace Chaos
                                         }
                                         break;
                                 }
+                                Operador = Tokens[Pos].Valor;
+                                Avanzar(1);
                             }
                         }
+                        ImprimirPorDebug("Entregando " + Sumador);
                         return Sumador;
                     }
                     else
                     {
+                        ImprimirPorDebug("No hay tokens suficientes, operar logicamente 1 vez");
                         return FuncionSi();
                     }
                 }
