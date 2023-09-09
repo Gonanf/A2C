@@ -36,7 +36,7 @@ namespace Chaos
             //Si no coloco ningun argumento (Para los que solo hicieron doble click en el .exe)
             if (args.Length == 0)
             {
-                Console.WriteLine("Instalar Arbys2Code en la variable de entorno PATH?");
+                Console.WriteLine("Instalar A2C en la variable de entorno PATH?");
                 Console.WriteLine("S/N");
                 switch (Console.ReadLine().ToLower())
                 {
@@ -45,23 +45,23 @@ namespace Chaos
                         if (Old.Contains(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)))
                         {
                             Console.WriteLine("Ya esta instalado en el sistema");
-                            Console.WriteLine($"La ruta a Arbys2Code es:\n{Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)}");
-                            Console.WriteLine("Arbys2Code Vercion " + Vercion + " Edicion " + Edicion);
+                            Console.WriteLine($"La ruta a A2C es:\n{Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)}");
+                            Console.WriteLine("A2C Vercion " + Vercion + " Edicion " + Edicion);
                             Console.ReadLine();
                             Environment.Exit(0);
                             break;
                         }
                         //Si no esta, lo añadiremos
                         Environment.SetEnvironmentVariable("Path", New, User);
-                        Console.WriteLine($"La ruta a Arbys2Code es:\n{Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)}");
+                        Console.WriteLine($"La ruta a A2C es:\n{Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)}");
                         Console.WriteLine("Listo!");
                         Console.ReadLine();
                         Environment.Exit(0);
                         break;
                     case "n":
                         //Si dijo que no, pues eso
-                        Console.WriteLine($"La ruta a Arbys2Code es:\n{Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)}");
-                        Console.WriteLine("Arbys2Code Vercion " + Vercion + " Edicion " + Edicion);
+                        Console.WriteLine($"La ruta a A2C es:\n{Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)}");
+                        Console.WriteLine("A2C Vercion " + Vercion + " Edicion " + Edicion);
                         Console.ReadLine();
                         Environment.Exit(0);
                         break;
@@ -77,7 +77,7 @@ namespace Chaos
             }
             if (args.Length != 2)
             {
-                Console.WriteLine("Arbys2Code necesita 2 argumentos, un metodo de ejecucion y un archivo .arb, coloque Arbys2Code Ayuda para mas informacion");
+                Console.WriteLine("A2C necesita 2 argumentos, un metodo de ejecucion y un archivo .arb, coloque Arbys2Code Ayuda para mas informacion");
                 Console.WriteLine("A2C " + String.Join(" ", args));
                 Console.ReadLine();
                 Environment.Exit(0);
@@ -98,7 +98,7 @@ namespace Chaos
                     Console.WriteLine("Depurar");
                     break;
                 case "Ayuda":
-                    Console.WriteLine("Ayuda");
+                    Console.WriteLine("A2C es un lenguaje de programacion hecho por estudiantes de programacion de una tecnica\n\nSINTAXIS: Es literal, tiene que estar perfectamente escrito y tener espacios por cada accion o habra errores\n\nFunciones:\nImprimir -> Imprime en pantalla\nLeer -> Lee lo que el usuario le coloque en la consola\n{Leer} -> Toma los numeros que coloque el usuario en la consola\nSi -> Es un condicional, verifica si es verdadero\n\nTipos de datos:\n|Texto| -> String, tipo de valor que almacena caracteres\n3123 -> Para los numeros no se necesitan ningun identificador\nVariable -> Las variables no se necesitan declarar con un tipo, no deben ser ninguna funcion\nVerdadero -> Booleano verdadero\nFalso -> Booleano falso\n\nOPERADORES:\n\nOperadores matematicos:\n+ -> Suma, lo soportan los enteros y strings\n- -> Resta, lo soportan los enteros\n* -> Multiplicacion, lo soportan los enteros\n/ -> Divicion, lo soportan los enteros\n\nOperadores logicos:\n< -> Menor a, lo soportan los enteros\n> -> Mayor a, lo soportan los enteros\n= -> Igual a, los soportan todos los tipos de datos\n! -> Distinto a, lo soportan todos los tipos de datos\n\nESTRUCTURA:\nImprimir |Texto| + Variable -> Este es un ejemplo de imprimir\nVariable = Leer -> Almacena en Variable lo que el usuario coloque en la consola\nVariable = {Leer} -> Almacena en Variable los numeros que el usuario coloque en la consola\nSi 1 = 2 ( Imprimir |Esto no puede pasar!| ) -> Este es un ejemplo, verifica si 1 es igual a 2, como es falso no ejecutara lo que este dentro de las parentesis\n\nEn caso de encontrar errores reportelo aqui: https://github.com/Gonanf/A2C");
                     Console.ReadLine();
                     Environment.Exit(0);
                     break;
@@ -146,16 +146,19 @@ namespace Chaos
             //Si no tiene errores continuar normalmente
             if (Errores.Count == 0)
             {
-                Console.WriteLine("\nSin errores detectador\n");
+                
+                if (args[0] == "Depurar")
+                {
+                    Console.WriteLine("\nSin errores detectados\n");
+                    Console.ReadLine();
+                    Environment.Exit(0);
+                }
                 Perser(args[0], Dir.Replace(".arb", ""));
             }
             else //Si tiene errores mostrarlos
             {
-                for (int i = 0; i < Errores.Count; i++)
-                {
-                    Console.ForegroundColor = ConsoleColor.Yellow;
-                    Console.WriteLine(Errores[i].Nombre + " Con token " + Tokens[Errores[i].Token]);
-                }
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine(Errores[0].Nombre + " Con token " + Tokens[Errores[0].Token]);
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.ReadKey();
                 Environment.Exit(0);
@@ -184,7 +187,10 @@ namespace Chaos
                 ")",
                 "<",
                 ">",
-                "!"};
+                "!",
+                "Y",
+                "O",
+                "{Leer}"};
 
                 //Mientras que la posicion del programa en los caracteres del codigo no supere la cantidad existente
                 while (Pos < Codigo.Length)
@@ -422,6 +428,22 @@ namespace Chaos
                                     ImprimirPorDebug("Leyendo");
                                     Avanzar(1);
                                     continue;
+                                case "{Leer}":
+                                    ImprimirPorDebug("Letyed");
+                                    if (!Validacion.Contains(false))
+                                    {
+                                        if (Valargs != "Depurar" && Valargs != "CMP")
+                                        {
+                                            ImprimirPorDebug("Ambos Leyendo y Compilando");
+                                            Console.ReadLine();
+
+                                        }
+                                        Compilado += "System.Console.ReadLine();\n";
+
+                                    }
+                                    ImprimirPorDebug("Leyendo");
+                                    Avanzar(1);
+                                    continue;
                                 case "Si":
                                     if (SiExisteTokens(5))
                                     {
@@ -552,7 +574,7 @@ namespace Chaos
                     ImprimirPorDebug("Empezando a compilar");
                     //Mostrar el codigo traducido
                     Console.ForegroundColor = ConsoleColor.Magenta;
-                    Compilado += "\nSystem.Console.ReadLine();}\n}\n}";
+                    Compilado += "\nSystem.Console.ReadLine();\n}\n}\n}";
                     Console.WriteLine(Compilado);
                     //Compilar
                     CompilerResults Results = CodProv.CompileAssemblyFromSource(Param, Compilado);
@@ -716,8 +738,9 @@ namespace Chaos
                                             break;
                                         default:
                                             ImprimirPorDebug("Invalida operacion string " + Sumador);
-                                            Avanzar(1);
+                                            
                                             AñadirError("Solo se puede sumar string");
+                                            Avanzar(1);
                                             break;
                                     }
                                     break;
@@ -740,8 +763,9 @@ namespace Chaos
                                                 Sumador = ((Int32.Parse(Sumador.Valor) / Int32.Parse(Tokens[Pos + 1].Valor)).ToString(), "Entero");
                                                 break;
                                             default:
-                                                Avanzar(1);
+                                                
                                                 AñadirError("Caracter operacion invalido");
+                                                Avanzar(1);
                                                 break;
                                         }
                                     }
@@ -751,26 +775,29 @@ namespace Chaos
                                     ImprimirPorDebug("Sumando var");
                                     if (Nuevo != -1)
                                     {
+
                                         if (Variables[Nuevo].Tipo == "Entero" && Sumador.Tipo == "Entero")
                                         {
-                                            Compilado += " " + Tokens[Pos].Valor + " " + Variables[Nuevo].Valor;
+                                                Compilado += " " + Tokens[Pos].Valor + " " + Variables[Nuevo].Nombre;
+                                            
                                             switch (Tokens[Pos].Valor)
                                             {
                                                 case "+":
-                                                    Sumador = ((Int32.Parse(Sumador.Valor) + Int32.Parse(Variables[Nuevo].Valor)).ToString(), "Entero");
+                                                    Sumador = ((Int32.Parse(Variables[Nuevo].Valor) + Int32.Parse(Sumador.Valor)).ToString(), "Entero");
                                                     break;
                                                 case "-":
-                                                    Sumador = ((Int32.Parse(Sumador.Valor) - Int32.Parse(Variables[Nuevo].Valor)).ToString(), "Entero");
+                                                    Sumador = ((Int32.Parse(Variables[Nuevo].Valor) + Int32.Parse(Sumador.Valor).ToString(), "Entero"));
                                                     break;
                                                 case "*":
-                                                    Sumador = ((Int32.Parse(Sumador.Valor) * Int32.Parse(Variables[Nuevo].Valor)).ToString(), "Entero");
+                                                    Sumador = ((Int32.Parse(Variables[Nuevo].Valor) + Int32.Parse(Sumador.Valor).ToString(), "Entero"));
                                                     break;
                                                 case "/":
-                                                    Sumador = ((Int32.Parse(Sumador.Valor) / Int32.Parse(Variables[Nuevo].Valor)).ToString(), "Entero");
+                                                    Sumador = ((Int32.Parse(Variables[Nuevo].Valor) + Int32.Parse(Sumador.Valor).ToString(), "Entero"));
                                                     break;
                                                 default:
-                                                    Avanzar(1);
+                                                    
                                                     AñadirError("Caracter operacion invalido");
+                                                    Avanzar(1);
                                                     break;
                                             }
 
@@ -784,25 +811,29 @@ namespace Chaos
                                                     Compilado += " " + Tokens[Pos].Valor + " " + Variables[Nuevo].Nombre;
                                                     break;
                                                 default:
-                                                    Avanzar(1);
+                                                    
                                                     AñadirError("Solo se puede sumar string");
+                                                    Avanzar(1);
                                                     break;
                                             }
                                         }
                                     }
                                     else
                                     {
-                                        Avanzar(1);
+                                        
                                         AñadirError("No puedes asignar una variable no declarada");
+                                        Avanzar(1);
                                     }
                                     break;
                                 case "Funcion":
-                                    Avanzar(1);
+                                   
                                     AñadirError("No se puede operar con una funcion");
+                                    Avanzar(1);
                                     break;
                                 default:
-                                    Avanzar(1);
+                                    
                                     AñadirError("No se puede operar con otro tipo ademas de string, entero y funcion");
+                                    Avanzar(1);
                                     break;
                             }
 
@@ -831,12 +862,14 @@ namespace Chaos
                             {
                                 Avanzar(1);
                                 Compilado += " " + Variables[Nuevo].Nombre;
+
                                 return (Variables[Nuevo].Valor, Variables[Nuevo].Tipo);
                             }
                             else
                             {
-                                Avanzar(1);
+                                
                                 AñadirError("Esta asignando una variable no declarada");
+                                Avanzar(1);
                             }
                         }
                         else if (Primero.Tipo == "String")
@@ -849,7 +882,7 @@ namespace Chaos
                         {
                             if (Primero.Valor == "Leer")
                             {
-                                string temp = "loremp";
+                                string temp = "Loremp";
                                 Avanzar(1);
                                 if (Valargs != "CMP" && Valargs != "Depurar" && !Validacion.Contains(false))
                                 {
@@ -861,10 +894,23 @@ namespace Chaos
                                 return (temp, "String");
 
                             }
+                            else if (Primero.Valor == "{Leer}")
+                            {
+                                string temp = "10";
+                                Avanzar(1);
+                                if (Valargs != "CMP" && Valargs != "Depurar" && !Validacion.Contains(false))
+                                {
+                                    Console.ForegroundColor = ConsoleColor.Blue;
+                                    temp = Console.ReadLine();
+                                    Console.ForegroundColor = ConsoleColor.White;
+                                }
+                                Compilado += " Int32.Parse(System.Console.ReadLine())";
+                                return (temp, "Entero");
+                            }
                             else
                             {
-                                Avanzar(1);
                                 AñadirError("La unica funcion que se le puede asignar a una variable es la funcion Leer");
+                                Avanzar(1);
                                 return ("", "");
                             }
                         }
@@ -896,6 +942,9 @@ namespace Chaos
                     }
 
                 }
+                ////////////////////
+                //   OPERACION L  //
+                ////////////////////
                 bool OperacionL()
                 {
                     if (SiExisteTokens(3))
@@ -903,7 +952,7 @@ namespace Chaos
                         ImprimirPorDebug("Hay toknes para los ¿e sii");
                         bool Sumador = FuncionSi();
                         ImprimirPorDebug("Se hizo la primera operacion logica");
-                        if (Tokens[Pos].Valor == "Y" || Tokens[Pos].Valor == "O")
+                        if (Tokens[Pos].Valor == "Y" || Tokens[Pos].Valor == "O" && Tokens[Pos].Tipo == "Funcion")
                         {
                             switch (Tokens[Pos].Valor)
                             {
@@ -916,7 +965,7 @@ namespace Chaos
                             }
                             string Operador = Tokens[Pos].Valor;
                             Avanzar(1);
-                            while (Operador == "Y" || Operador == "O")
+                            while (Operador == "Y" || Operador == "O" && Tokens[Pos].Tipo == "Funcion")
                             {
 
                                 bool Resultado = FuncionSi();
@@ -990,8 +1039,9 @@ namespace Chaos
                             Compilado += " !=";
                             break;
                         default:
-                            Avanzar(1);
+                            
                             AñadirError("Operacion logica no valida");
+                            Avanzar(1);
                             break;
                     }
                     Avanzar(1);
@@ -999,7 +1049,9 @@ namespace Chaos
                     ImprimirPorDebug("Segundo valor a operar " + Segundo);
                     switch (Funcion)
                     {
+
                         case "<":
+
                             if (Primero.Tipo == "Entero" && Segundo.Tipo == "Entero")
                             {
                                 if (Int32.Parse(Primero.Valor) < Int32.Parse(Segundo.Valor))
@@ -1013,8 +1065,8 @@ namespace Chaos
                             }
                             else
                             {
-                                Avanzar(1);
-                                AñadirError("No se puede operar logicamente con otro tipo ademas de entero");
+                                    AñadirError("No se puede operar logicamente con otro tipo ademas de entero");
+                                    Avanzar(1);
                                 return false;
                             }
                             break;
@@ -1032,8 +1084,9 @@ namespace Chaos
                             }
                             else
                             {
-                                Avanzar(1);
-                                AñadirError("No se puede operar logicamente con otro tipo ademas de entero");
+
+                                    AñadirError("No se puede operar logicamente con otro tipo ademas de entero");
+                                    Avanzar(1);
                                 return false;
                             }
                             break;
@@ -1069,8 +1122,9 @@ namespace Chaos
                             }
                             else
                             {
-                                Avanzar(1);
-                                AñadirError("No se puede operar logicamente");
+
+                                    AñadirError("No se puede operar logicamente");
+                                    Avanzar(1);
                                 return false;
                             }
                             break;
@@ -1106,14 +1160,16 @@ namespace Chaos
                             }
                             else
                             {
-                                Avanzar(1);
+                                
                                 AñadirError("No se puede operar logicamente");
+                                Avanzar(1);
                                 return false;
                             }
                             break;
                         default:
-                            Avanzar(1);
+                            
                             AñadirError("No es una opcion valida " + Funcion);
+                            Avanzar(1);
                             return false;
                             break;
                     }
