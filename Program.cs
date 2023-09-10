@@ -20,7 +20,7 @@ namespace Chaos
         static void Main(string[] args)
         {
             //DATOS DE SOFTWARE////////////
-            string Vercion = "0.0.9";    //
+            string Vercion = "0.0.10";    //
             string Edicion = "Estandar";   //
             //////////////////////////////
             //Lista de tokens, almacenaran las funciones y variable
@@ -146,7 +146,7 @@ namespace Chaos
             //Si no tiene errores continuar normalmente
             if (Errores.Count == 0)
             {
-                
+
                 if (args[0] == "Depurar")
                 {
                     Console.WriteLine("\nSin errores detectados\n");
@@ -515,8 +515,8 @@ namespace Chaos
                                         if (!Validacion.Contains(false))
                                         {
                                             ImprimirPorDebug("Asignando VARIAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-                                            
-                                            Variables[Originla] = (Variables[Originla].Nombre, Result.Tipo, Result.Valor); 
+
+                                            Variables[Originla] = (Variables[Originla].Nombre, Result.Tipo, Result.Valor);
                                         }
                                         Compilado += ";\n";
                                     }
@@ -527,7 +527,7 @@ namespace Chaos
                                         if (!Validacion.Contains(false))
                                         {
                                             ImprimirPorDebug("Asignando VARIAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-                                            Variables.Add((Tokens[PosOriginal].Valor, Result.Tipo, Result.Valor)); 
+                                            Variables.Add((Tokens[PosOriginal].Valor, Result.Tipo, Result.Valor));
                                         }
                                         Compilado += ";\n";
                                     }
@@ -555,7 +555,7 @@ namespace Chaos
                             }
                             continue;
                         default:
-                            ImprimirPorDebug(Tokens[Pos + 1].ToString()+ "UWU" );
+                            ImprimirPorDebug(Tokens[Pos + 1].ToString() + "UWU");
                             AñadirError("El tipo del token no es valido");
                             Avanzar(1);
                             break;
@@ -646,7 +646,7 @@ namespace Chaos
                     {
                         Pos = Tokens.Count();
                     }
-                    
+
                 }
                 //Obtener el index de la variable a buscar
                 ////////////////////
@@ -703,34 +703,41 @@ namespace Chaos
                 ////////////////////
                 //   OPERACION M  //
                 ////////////////////
+                //Realiza operaciones matematicas infinitas (+, -, *, /)
                 (string Valor, string Tipo) OperacionM()
                 {
                     ImprimirPorDebug("Operando");
+                    //Guarda el primer valor a operar, el que no se le añade antes un operador (Es la exepcion)
                     (string Valor, string Tipo) Primero = Tokens[Pos];
+                    //Si hay tokens suficientes
                     if (SiExisteTokens(2))
                     {
                         ImprimirPorDebug("Existen tokens para operar");
+                        //Esto esta demas, pero que importa
                         (string Valor, string Tipo) Sumador = Primero;
+                        //Si el siguiente token es un operador matematico
                         if (Tokens[Pos + 1].Tipo == "Funcion" && Operaciones.Contains(Tokens[Pos + 1].Valor))
                         {
                             ImprimirPorDebug("Sumando mas");
+                            //Operar y guardar los primeros valores
                             Sumador = PrimeroVal();
                         }
-                        else
+                        else //Si no es un operador matematico
                         {
                             ImprimirPorDebug("No hay tokens de operacion");
+                            //Devolver la operacion de los tokens
                             return PrimeroVal();
                         }
-
+                        //Si sigue habiendo operadores, empezar la operacion infinita
                         while (Tokens[Pos].Tipo == "Funcion" && Operaciones.Contains(Tokens[Pos].Valor) && Pos < Tokens.Count())
                         {
-
                             switch (Tokens[Pos + 1].Tipo)
                             {
+                                //Si es un string el token a operar
                                 case "String":
                                     switch (Tokens[Pos].Valor)
                                     {
-                                        
+                                        //Solo se pueden sumar strings
                                         case "+":
                                             ImprimirPorDebug("Esta sumando string " + Sumador);
                                             Sumador = (Sumador.Valor + Tokens[Pos + 1].Valor, "String");
@@ -738,18 +745,20 @@ namespace Chaos
                                             break;
                                         default:
                                             ImprimirPorDebug("Invalida operacion string " + Sumador);
-                                            
                                             AñadirError("Solo se puede sumar string");
                                             Avanzar(1);
                                             break;
                                     }
                                     break;
+                                    //Si es un entero el token a operar
                                 case "Entero":
+                                    //Si la suma hasta ahora esta siendo entero
                                     if (Sumador.Tipo == "Entero")
                                     {
                                         Compilado += " " + Tokens[Pos].Valor + " " + Tokens[Pos + 1].Valor;
-                                        switch (Tokens[Pos].Valor)
+                                        switch (Tokens[Pos].Valor) //Los enteros pueden hacer todas las operaciones
                                         {
+                                            //Convertir de string a entero, operar y luego convertirlo a string de nuevo y guardar
                                             case "+":
                                                 Sumador = ((Int32.Parse(Sumador.Valor) + Int32.Parse(Tokens[Pos + 1].Valor)).ToString(), "Entero");
                                                 break;
@@ -763,47 +772,49 @@ namespace Chaos
                                                 Sumador = ((Int32.Parse(Sumador.Valor) / Int32.Parse(Tokens[Pos + 1].Valor)).ToString(), "Entero");
                                                 break;
                                             default:
-                                                
+
                                                 AñadirError("Caracter operacion invalido");
                                                 Avanzar(1);
                                                 break;
                                         }
                                     }
                                     break;
+                                //Si el siguiente token a operar es una variable
                                 case "Variable":
+                                    //Buscar la variable en la lista de variables
                                     int Nuevo = IndexVar(Tokens[Pos + 1].Valor);
                                     ImprimirPorDebug("Sumando var");
                                     if (Nuevo != -1)
                                     {
-
+                                        //Si la variable existe
                                         if (Variables[Nuevo].Tipo == "Entero" && Sumador.Tipo == "Entero")
                                         {
-                                                Compilado += " " + Tokens[Pos].Valor + " " + Variables[Nuevo].Nombre;
-                                            
+                                            //Si ambos, la operacion hasta ahora y la nueva variable son enteros
+                                            Compilado += " " + Tokens[Pos].Valor + " " + Variables[Nuevo].Nombre;
                                             switch (Tokens[Pos].Valor)
                                             {
+                                                //Convertir de string a entero, operar y luego convertirlo a string de nuevo y guardar
                                                 case "+":
                                                     Sumador = ((Int32.Parse(Variables[Nuevo].Valor) + Int32.Parse(Sumador.Valor)).ToString(), "Entero");
                                                     break;
                                                 case "-":
-                                                    Sumador = ((Int32.Parse(Variables[Nuevo].Valor) + Int32.Parse(Sumador.Valor).ToString(), "Entero"));
+                                                    Sumador = ((Int32.Parse(Variables[Nuevo].Valor) - Int32.Parse(Sumador.Valor)).ToString(), "Entero");
                                                     break;
                                                 case "*":
-                                                    Sumador = ((Int32.Parse(Variables[Nuevo].Valor) + Int32.Parse(Sumador.Valor).ToString(), "Entero"));
+                                                    Sumador = ((Int32.Parse(Variables[Nuevo].Valor) * Int32.Parse(Sumador.Valor)).ToString(), "Entero");
                                                     break;
                                                 case "/":
-                                                    Sumador = ((Int32.Parse(Variables[Nuevo].Valor) + Int32.Parse(Sumador.Valor).ToString(), "Entero"));
+                                                    Sumador = ((Int32.Parse(Variables[Nuevo].Valor) / Int32.Parse(Sumador.Valor)).ToString(), "Entero");
                                                     break;
                                                 default:
-                                                    
                                                     AñadirError("Caracter operacion invalido");
                                                     Avanzar(1);
                                                     break;
                                             }
-
                                         }
                                         else
                                         {
+                                            //Si alguno no es entero, tratarlos como string
                                             switch (Tokens[Pos].Valor)
                                             {
                                                 case "+":
@@ -811,7 +822,6 @@ namespace Chaos
                                                     Compilado += " " + Tokens[Pos].Valor + " " + Variables[Nuevo].Nombre;
                                                     break;
                                                 default:
-                                                    
                                                     AñadirError("Solo se puede sumar string");
                                                     Avanzar(1);
                                                     break;
@@ -820,93 +830,116 @@ namespace Chaos
                                     }
                                     else
                                     {
-                                        
+                                        //Si no existe la variable a operar
                                         AñadirError("No puedes asignar una variable no declarada");
                                         Avanzar(1);
                                     }
                                     break;
                                 case "Funcion":
-                                   
+                                    //No se puede sumar con Leer o {Leer} por que aun no se declaro su contenido
                                     AñadirError("No se puede operar con una funcion");
                                     Avanzar(1);
                                     break;
                                 default:
-                                    
+                                    //Si trata de operar con Booleanos
                                     AñadirError("No se puede operar con otro tipo ademas de string, entero y funcion");
                                     Avanzar(1);
                                     break;
                             }
-
+                            //Termina el switch del siguiente token
                             if (SiExisteTokens(2))
                             {
+                                //Si se puede avanzar, avanzar
                                 Avanzar(2);
                             }
                             else
                             {
+                                //Si no se puede avanzar, terminar
                                 Avanzar(2);
                                 return Sumador;
                             }
                         }
+                        //Terminar de todas formas
                         return Sumador;
                     }
+                    //No hay tokens suficientes para la operacion infinita
                     else
                     {
+                        //Devolver el primer valor convertido
                         return PrimeroVal();
                     }
+                    //Situacion de exepcion del primer valor
                     (string Valor, string Tipo) PrimeroVal()
                     {
+                        //Si el primero es una variable
                         if (Primero.Tipo == "Variable")
                         {
+                            //Buscar la variable
                             int Nuevo = IndexVar(Primero.Valor);
                             if (Nuevo != -1)
                             {
+                                //Si la variable existe
                                 Avanzar(1);
+                                //Compilar y devolver
                                 Compilado += " " + Variables[Nuevo].Nombre;
-
                                 return (Variables[Nuevo].Valor, Variables[Nuevo].Tipo);
                             }
                             else
                             {
-                                
+                                //Si no existe la variable a asignar
                                 AñadirError("Esta asignando una variable no declarada");
                                 Avanzar(1);
                             }
                         }
+                        //Si el primero es un string
                         else if (Primero.Tipo == "String")
                         {
+                            //Compilar y devolver
                             Compilado += " " + "\"" + Primero.Valor + "\"";
                             Avanzar(1);
                             return (Primero.Valor, Primero.Tipo);
                         }
+                        //Si el primero es una funcion
                         else if (Primero.Tipo == "Funcion")
                         {
+                            //Si el primero es Leer
                             if (Primero.Valor == "Leer")
                             {
+                                //Colocar texto de debug
                                 string temp = "Loremp";
                                 Avanzar(1);
+                                //Si tiene que ejecutar en la consola y no esta invalidado por sus padres (no es un referencia)
                                 if (Valargs != "CMP" && Valargs != "Depurar" && !Validacion.Contains(false))
                                 {
+                                    //Pedir texto y guardar temporalmente
                                     Console.ForegroundColor = ConsoleColor.Blue;
                                     temp = Console.ReadLine();
                                     Console.ForegroundColor = ConsoleColor.White;
                                 }
+                                //Compilar y devolver
                                 Compilado += " System.Console.ReadLine()";
                                 return (temp, "String");
 
                             }
+                            //Esto es lo mismo que Leer, pero para enteros
                             else if (Primero.Valor == "{Leer}")
                             {
+                                //Colocar texto de debug
                                 string temp = "10";
                                 Avanzar(1);
+                                //Si tiene que ejecutar en la consola y no esta invalidado por sus padres (no es un referencia)
                                 if (Valargs != "CMP" && Valargs != "Depurar" && !Validacion.Contains(false))
                                 {
+                                    //Pedir texto y guardar temporalmente
                                     Console.ForegroundColor = ConsoleColor.Blue;
                                     temp = Console.ReadLine();
                                     Console.ForegroundColor = ConsoleColor.White;
                                 }
+                                //Compilar y devolver
                                 Compilado += " Int32.Parse(System.Console.ReadLine())";
                                 return (temp, "Entero");
                             }
+                            //Si es alguna otra funcion
                             else
                             {
                                 AñadirError("La unica funcion que se le puede asignar a una variable es la funcion Leer");
@@ -914,12 +947,15 @@ namespace Chaos
                                 return ("", "");
                             }
                         }
+                        //Si no es funcion, pero es un entero
                         else if (Primero.Tipo == "Entero")
                         {
+                            //Compilar y devolver
                             Avanzar(1);
                             Compilado += " " + Primero.Valor;
                             return (Primero.Valor, Primero.Tipo);
                         }
+                        //Si no es ninguno, debe ser un Booleano
                         else
                         {
                             Avanzar(1);
@@ -935,40 +971,49 @@ namespace Chaos
 
 
                         }
+                        //Si no es ninguno de los casos anteriores, simplemente devolver y rezar a lo mejor
                         Avanzar(1);
                         Compilado += " " + Primero.Valor;
                         return (Primero.Valor, Primero.Tipo);
 
                     }
-
+                    //Fin primero val
                 }
                 ////////////////////
                 //   OPERACION L  //
                 ////////////////////
                 bool OperacionL()
                 {
+                    //Si hay tokens suficientes (Condicion Operador Condicion)
                     if (SiExisteTokens(3))
                     {
                         ImprimirPorDebug("Hay toknes para los ¿e sii");
+                        //Operar los primeros valores
                         bool Sumador = FuncionSi();
                         ImprimirPorDebug("Se hizo la primera operacion logica");
+                        //Si le siguie un concatenador
                         if (Tokens[Pos].Valor == "Y" || Tokens[Pos].Valor == "O" && Tokens[Pos].Tipo == "Funcion")
                         {
                             switch (Tokens[Pos].Valor)
                             {
                                 case "Y":
+                                    //Traducir Y al lenguaje C# y compilar
                                     Compilado += " && ";
                                     break;
                                 case "O":
+                                    //Traducir O al lenguaje C# y compilar
                                     Compilado += " || ";
                                     break;
                             }
+                            //Operador es el concatenador actual
                             string Operador = Tokens[Pos].Valor;
                             Avanzar(1);
+                            //Si hay un concatenador, empezar la operacion infinita
                             while (Operador == "Y" || Operador == "O" && Tokens[Pos].Tipo == "Funcion")
                             {
-
+                                //Operar el siguiente valor
                                 bool Resultado = FuncionSi();
+                                //Añadir a la compilacion
                                 switch (Tokens[Pos].Valor)
                                 {
                                     case "Y":
@@ -981,7 +1026,7 @@ namespace Chaos
                                 switch (Tokens[Pos].Valor)
                                 {
                                     case "Y":
-
+                                        //Si ambos son iguales, devolver verdadero, sino, falso
                                         ImprimirPorDebug("Es Y");
                                         if (Sumador == Resultado)
                                         {
@@ -995,7 +1040,7 @@ namespace Chaos
                                         }
                                         break;
                                     case "O":
-
+                                        //Si uno de las condicionales es verdadero, devolver verdadero, sino, falso
                                         if (Sumador || Resultado)
                                         {
                                             Sumador = true;
@@ -1006,24 +1051,36 @@ namespace Chaos
                                         }
                                         break;
                                 }
+                                //Actualizar operador y avanzar
                                 Operador = Tokens[Pos].Valor;
                                 Avanzar(1);
                             }
+                            //Termina operacion infinita
                         }
+                        //Termina primer IF, entregar el resultado
                         ImprimirPorDebug("Entregando " + Sumador);
                         return Sumador;
                     }
                     else
                     {
+                        //Si no hay tokens para operar infinitamente, devolver la primera operacion
                         ImprimirPorDebug("No hay tokens suficientes, operar logicamente 1 vez");
                         return FuncionSi();
                     }
                 }
+                //Fin operacionL
+                ////////////////////
+                //   Funcion SI   //
+                ////////////////////
                 bool FuncionSi()
                 {
+                    //NOTA: Esto pudo estar integrado a operacion L, pero no me dio ganaaaaaaaaaaaas
+                    //Realizar la primera operacion matematica
                     (string Valor, string Tipo) Primero = OperacionM();
                     ImprimirPorDebug("Primer valor a operar " + Primero);
+                    //Guardar el operador logico
                     string Funcion = Tokens[Pos].Valor;
+                    //Compilar el operador logico
                     switch (Funcion)
                     {
                         case "<":
@@ -1039,21 +1096,22 @@ namespace Chaos
                             Compilado += " !=";
                             break;
                         default:
-                            
                             AñadirError("Operacion logica no valida");
                             Avanzar(1);
                             break;
                     }
                     Avanzar(1);
+                    //Realizar la segunda operacion matematica
                     (string Valor, string Tipo) Segundo = OperacionM();
                     ImprimirPorDebug("Segundo valor a operar " + Segundo);
                     switch (Funcion)
                     {
-
+                        //Si es menor a: Solo lo pueden hacer los enteros
                         case "<":
-
+                            //Si ambos son enteros
                             if (Primero.Tipo == "Entero" && Segundo.Tipo == "Entero")
                             {
+                                //Realizar la condicion
                                 if (Int32.Parse(Primero.Valor) < Int32.Parse(Segundo.Valor))
                                 {
                                     return true;
@@ -1065,14 +1123,17 @@ namespace Chaos
                             }
                             else
                             {
-                                    AñadirError("No se puede operar logicamente con otro tipo ademas de entero");
-                                    Avanzar(1);
+                                //Sino dar error
+                                AñadirError("No se puede operar logicamente con otro tipo ademas de entero");
+                                Avanzar(1);
                                 return false;
                             }
-                            break;
+                        //Si es mayor a: Solo lo pueden hacer los enteros
                         case ">":
+                            //Si ambos son enteros
                             if (Primero.Tipo == "Entero" && Segundo.Tipo == "Entero")
                             {
+                                //Realizar la condicion
                                 if (Int32.Parse(Primero.Valor) > Int32.Parse(Segundo.Valor))
                                 {
                                     return true;
@@ -1084,13 +1145,14 @@ namespace Chaos
                             }
                             else
                             {
-
-                                    AñadirError("No se puede operar logicamente con otro tipo ademas de entero");
-                                    Avanzar(1);
+                                //Sino dar error
+                                AñadirError("No se puede operar logicamente con otro tipo ademas de entero");
+                                Avanzar(1);
                                 return false;
                             }
-                            break;
+                        //Si es igual a: Lo pueden hacer todos los tipos de datos
                         case "=":
+                            //Si ambos son enteros, verificar por numero
                             if (Primero.Tipo == "Entero" && Segundo.Tipo == "Entero")
                             {
                                 if (Int32.Parse(Primero.Valor) == Int32.Parse(Segundo.Valor))
@@ -1102,6 +1164,7 @@ namespace Chaos
                                     return false;
                                 }
                             }
+                            //Si ambos son booleanos, verificar por string
                             else if (Primero.Tipo == "Booleano" && Segundo.Tipo == "Booleano")
                             {
                                 if (Primero.Valor == Segundo.Valor)
@@ -1110,6 +1173,7 @@ namespace Chaos
                                 }
                                 else { return false; }
                             }
+                            //Si ambos son string, verificar por texto
                             else if (Primero.Tipo == "String" && Segundo.Tipo == "String")
                             {
                                 ImprimirPorDebug("Ambos son strings");
@@ -1120,15 +1184,16 @@ namespace Chaos
                                 }
                                 else { ImprimirPorDebug("Ambos strings son diferentes " + Primero + "/" + Segundo); return false; }
                             }
+                            //NOTA: Seccion a repensar
                             else
                             {
-
-                                    AñadirError("No se puede operar logicamente");
-                                    Avanzar(1);
+                                AñadirError("No se puede operar logicamente");
+                                Avanzar(1);
                                 return false;
                             }
-                            break;
+                        //Si es diferente a: Lo pueden hacer todos los tipos de datos
                         case "!":
+                            //Si ambos son enteros, verificar por numero
                             if (Primero.Tipo == "Entero" && Segundo.Tipo == "Entero")
                             {
                                 if (Int32.Parse(Primero.Valor) != Int32.Parse(Segundo.Valor))
@@ -1140,6 +1205,7 @@ namespace Chaos
                                     return false;
                                 }
                             }
+                            //Si ambos son booleanos, verificar por string
                             else if (Primero.Tipo == "Booleano" && Segundo.Tipo == "Booleano")
                             {
                                 if (Primero.Valor != Segundo.Valor)
@@ -1148,6 +1214,7 @@ namespace Chaos
                                 }
                                 else { return false; }
                             }
+                            //Si ambos son string, verificar por texto
                             else if (Primero.Tipo == "String" && Segundo.Tipo == "String")
                             {
                                 ImprimirPorDebug("Ambos son strings");
@@ -1158,22 +1225,22 @@ namespace Chaos
                                 }
                                 else { ImprimirPorDebug("Los strings son iguales " + Primero + "/" + Segundo); return false; }
                             }
+                            //NOTA: Seccion a repensar
                             else
                             {
-                                
                                 AñadirError("No se puede operar logicamente");
                                 Avanzar(1);
                                 return false;
                             }
-                            break;
+                        //Si es algun operador logico que no existe en el lenguaje
                         default:
-                            
                             AñadirError("No es una opcion valida " + Funcion);
                             Avanzar(1);
                             return false;
-                            break;
                     }
+                    //Fin switch Operador
                 }
+                //Fin Funcion Si
             }
             //Fin void Perser
         }
