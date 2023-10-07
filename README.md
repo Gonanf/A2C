@@ -1,6 +1,6 @@
 #A2C es un lenguaje de programacion hecho por estudiantes de programacion de una tecnica
 
-
+Este proyecto esta terminado, no se seguira añadiendo funcionalidades pero se aceptaran los cambios que se propongan y se arreglaran errores por el momento
 
 ##COMO INSTALAR:
 
