@@ -1,9 +1,16 @@
 #A2C es un lenguaje de programacion hecho por estudiantes de programacion de una tecnica
 
-Este proyecto esta terminado, no se seguira añadiendo funcionalidades pero se aceptaran los cambios que se propongan y se arreglaran errores por el momento
+DEPENDENCIAS A2C: .NET Framework 4.8.1 (Incluido en el instalador)
+
+DEPENDENCIAS MEAT-BEVERAGE: .NET Framework 4.8.1 , FastColoredTextBox (Ambos incluidos en el instalador)
+
+
+**Este proyecto esta terminado, no se seguira añadiendo funcionalidades pero se aceptaran los cambios que se propongan y se arreglaran errores por el momento**
+
 
 ##COMO INSTALAR:
 
+Descargar e iniciar Instalar A2C.exe, ahi esta el lenguaje, la dependencia y la IDE
 
 Seguir los pasos de este instalador, si A2C no abre o se cierra de inmediato:
 
@@ -17,6 +24,45 @@ Seguir los pasos de este instalador, si A2C no abre o se cierra de inmediato:
 
 -Iniciar A2C (En caso de usar la IDE Meat/Beverage, no es necesario añadir a las variables de entorno)
 
+
+(Para iniciar la IDE)
+
+
+-Ir a la carpeta de instalacion y abrir MEAT-BEVERAGE
+
+
+(Para ejecutar codigo sin la IDE)
+
+
+-Ir a la carpeta de instalacion
+
+-Apretar A2C 
+
+-Colocar S
+
+-Crear un archivo .arb con el codigo
+
+-Abrir a CMD/PowerShell
+
+-Ir al directorio del archivo .arb
+
+-Colocar A2C junto al tipo de ejecucion y el nombre del archivo sin la extencion (sin .arb)
+
+
+Tipo de ejecucion:
+
+
+JIT: No realiza ningun archivo ejecutable pero si ejecuta las instrucciones en la consola
+
+CMP: Realiza un archivo ejecutable con el nombre del archivo .arb y no ejecuta las intrucciones en la consola
+
+Ambos: Realiza un archivo ejecutable y ejecuta las instrucciones en la consola
+
+
+Ejemplo de comando:
+
+
+A2C Ambos Nombre
 
 
 ##SINTAXIS: Es literal, tiene que estar perfectamente escrito y tener espacios por cada accion o habra errores
@@ -86,4 +132,4 @@ Variable = {Leer} -> Almacena en Variable los numeros que el usuario coloque en 
 Si 1 = 2 ( Imprimir "Esto no puede pasar!" ) -> Este es un ejemplo, verifica si 1 es igual a 2, como es falso no ejecutara lo que este #dentro de las parentesis
 
 
-En caso de encontrar errores reportelo aqui: https://github.com/Gonanf/A2C");
+En caso de encontrar errores reportelo aqui: https://github.com/Gonanf/A2C"
