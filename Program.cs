@@ -33,6 +33,37 @@ namespace Chaos
             var Old = Environment.GetEnvironmentVariable("PATH", User);
             //Almacenar el PATH junto a nuestro directorio para posterior ingreso
             var New = Old + Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            //AYUDA
+            string Ayuda = "A2C es un lenguaje de programacion hecho por estudiantes de programacion de una tecnica" +
+                    "\n\nSINTAXIS: Es literal, tiene que estar perfectamente escrito y tener espacios por cada accion o habra errores" +
+                    "\n\nFunciones:" +
+                    "\nImprimir -> Imprime en pantalla" +
+                    "\nLeer -> Lee lo que el usuario le coloque en la consola" +
+                    "\n{Leer} -> Toma los numeros que coloque el usuario en la consola" +
+                    "\nSi -> Es un condicional, verifica si es verdadero" +
+                    "\n\nTipos de datos:" +
+                    "\n\"Texto\" -> String, tipo de valor que almacena caracteres" +
+                    "\n3123 -> Para los numeros no se necesitan ningun identificador" +
+                    "\nVariable -> Las variables no se necesitan declarar con un tipo, no deben ser ninguna funcion" +
+                    "\nVerdadero -> Booleano verdadero" +
+                    "\nFalso -> Booleano falso" +
+                    "\n\nOPERADORES:" +
+                    "\n\nOperadores matematicos:" +
+                    "\n+ -> Suma, lo soportan los enteros y strings" +
+                    "\n- -> Resta, lo soportan los enteros" +
+                    "\n* -> Multiplicacion, lo soportan los enteros" +
+                    "\n/ -> Divicion, lo soportan los enteros" +
+                    "\n\nOperadores logicos:" +
+                    "\n< -> Menor a, lo soportan los enteros" +
+                    "\n> -> Mayor a, lo soportan los enteros" +
+                    "\n= -> Igual a, los soportan todos los tipos de datos" +
+                    "\n! -> Distinto a, lo soportan todos los tipos de datos" +
+                    "\n\nESTRUCTURA:" +
+                    "\nImprimir \"Texto\" + Variable -> Este es un ejemplo de imprimir" +
+                    "\nVariable = Leer -> Almacena en Variable lo que el usuario coloque en la consola" +
+                    "\nVariable = {Leer} -> Almacena en Variable los numeros que el usuario coloque en la consola" +
+                    "\nSi 1 = 2 ( Imprimir \"Esto no puede pasar!\" ) -> Este es un ejemplo, verifica si 1 es igual a 2, como es falso no ejecutara lo que este dentro de las parentesis" +
+                    "\n\nEn caso de encontrar errores reportelo aqui: https://github.com/Gonanf/A2C";
             //Si no coloco ningun argumento (Para los que solo hicieron doble click en el .exe)
             if (args.Length == 0)
             {
@@ -74,10 +105,15 @@ namespace Chaos
                 }
 
                 //Si no hay argumentos suficientes
+            }else if(args.Length == 1 && args[0] == "Ayuda")
+            {
+                Console.WriteLine(Ayuda);
+                Console.ReadLine();
+                Environment.Exit(0);
             }
             if (args.Length != 2)
             {
-                Console.WriteLine("A2C necesita 2 argumentos, un metodo de ejecucion y un archivo .arb, coloque Arbys2Code Ayuda para mas informacion");
+                Console.WriteLine("A2C necesita 2 argumentos, un metodo de ejecucion y un archivo .arb, coloque A2C Ayuda para mas informacion");
                 Console.WriteLine("A2C " + String.Join(" ", args));
                 Console.ReadLine();
                 Environment.Exit(0);
@@ -98,7 +134,7 @@ namespace Chaos
                     Console.WriteLine("Depurar");
                     break;
                 case "Ayuda":
-                    Console.WriteLine("A2C es un lenguaje de programacion hecho por estudiantes de programacion de una tecnica\n\nSINTAXIS: Es literal, tiene que estar perfectamente escrito y tener espacios por cada accion o habra errores\n\nFunciones:\nImprimir -> Imprime en pantalla\nLeer -> Lee lo que el usuario le coloque en la consola\n{Leer} -> Toma los numeros que coloque el usuario en la consola\nSi -> Es un condicional, verifica si es verdadero\n\nTipos de datos:\n|Texto| -> String, tipo de valor que almacena caracteres\n3123 -> Para los numeros no se necesitan ningun identificador\nVariable -> Las variables no se necesitan declarar con un tipo, no deben ser ninguna funcion\nVerdadero -> Booleano verdadero\nFalso -> Booleano falso\n\nOPERADORES:\n\nOperadores matematicos:\n+ -> Suma, lo soportan los enteros y strings\n- -> Resta, lo soportan los enteros\n* -> Multiplicacion, lo soportan los enteros\n/ -> Divicion, lo soportan los enteros\n\nOperadores logicos:\n< -> Menor a, lo soportan los enteros\n> -> Mayor a, lo soportan los enteros\n= -> Igual a, los soportan todos los tipos de datos\n! -> Distinto a, lo soportan todos los tipos de datos\n\nESTRUCTURA:\nImprimir |Texto| + Variable -> Este es un ejemplo de imprimir\nVariable = Leer -> Almacena en Variable lo que el usuario coloque en la consola\nVariable = {Leer} -> Almacena en Variable los numeros que el usuario coloque en la consola\nSi 1 = 2 ( Imprimir |Esto no puede pasar!| ) -> Este es un ejemplo, verifica si 1 es igual a 2, como es falso no ejecutara lo que este dentro de las parentesis\n\nEn caso de encontrar errores reportelo aqui: https://github.com/Gonanf/A2C");
+                    Console.WriteLine(Ayuda);
                     Console.ReadLine();
                     Environment.Exit(0);
                     break;
@@ -246,7 +282,7 @@ namespace Chaos
                                 Texto = "";
                             }
                             break;
-                        case '|':
+                        case '"':
                             //Si inicia un string, guardar todo token que aun no se guardo
                             if (Texto != " " && Texto != string.Empty)
                             {
@@ -256,7 +292,7 @@ namespace Chaos
                             }
                             Avanzar();
                             //Mientras que el usuario no cerro el string
-                            while (Codigo[Pos] != '|')
+                            while (Codigo[Pos] != '"')
                             {
                                 //Obtener y guardar sus caracteres
                                 Texto += Codigo[Pos];
