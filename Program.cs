@@ -20,13 +20,11 @@ namespace Chaos
         static void Main(string[] args)
         {
             //DATOS DE SOFTWARE////////////
-            string Vercion = "0.0.10";    //
+            string Vercion = "0.0.11";    //
             string Edicion = "Estandar";   //
             //////////////////////////////
             //Lista de tokens, almacenaran las funciones y variable
             List<(string Valor, string Tipo)> Tokens = new List<(string Valor, string Tipo)>();
-            //Lista de errores, almacenaran los errores para luego mostrarlos en una lista
-            List<(string Nombre, int Token)> Errores = new List<(string Nombre, int Token)>();
             //Obtener el usuario
             var User = EnvironmentVariableTarget.User;
             //Obtener el PATH de las variables de entorno del usuario
@@ -180,9 +178,6 @@ namespace Chaos
             //Verificar que el codigo no tenga errores
             Perser("Depurar", "");
             //Si no tiene errores continuar normalmente
-            if (Errores.Count == 0)
-            {
-
                 if (args[0] == "Depurar")
                 {
                     Console.WriteLine("\nSin errores detectados\n");
@@ -190,20 +185,11 @@ namespace Chaos
                     Environment.Exit(0);
                 }
                 Perser(args[0], Dir.Replace(".arb", ""));
-            }
-            else //Si tiene errores mostrarlos
-            {
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine(Errores[0].Nombre + " Con token " + Tokens[Errores[0].Token]);
-                Console.ForegroundColor = ConsoleColor.White;
-                Console.ReadKey();
-                Environment.Exit(0);
-            }
             //Empezando tokenizador
             void Tokenizador()
             {
                 //Obtener el texto del archivo especificado
-                string Codigo = string.Join(" ", File.ReadAllLines(Dir));
+                string Codigo = string.Join(" ",File.ReadAllLines(Dir));
                 int Pos = 0;
                 string Texto = "";
                 //Funciones validas
@@ -234,7 +220,8 @@ namespace Chaos
                     switch (Codigo[Pos])
                     {
                         //Si es un espacio el caracter
-                        case ' ':
+                        case '\n':
+                        case ' ' :
                             //Si es una funcion
                             if (Funciones.Contains(Texto))
                             {
@@ -443,7 +430,7 @@ namespace Chaos
                                     else
                                     {
                                         Avanzar(1);
-                                        AñadirError("No hay suficientes tokens para imprimir");
+                                        AñadirError("I-OFB01","Funcion: Imprimir: No existen tokens suficientes","No hay suficientes tokens para imprimir");
                                         //situacion de error
                                     }
                                     continue;
@@ -500,15 +487,9 @@ namespace Chaos
                                     else
                                     {
                                         Avanzar(1);
-                                        AñadirError("No existe tokens suficientes para la funcion Si");
+                                        AñadirError("S-OFB01","Funcion: Si: No existen tokens suficientes","No existe tokens suficientes para la funcion Si");
                                         continue;
                                     }
-                                    continue;
-                                case "Mientras":
-                                    //Por hacer
-                                    continue;
-                                case "Repetir":
-                                    //Por hacer
                                     continue;
                                 case ")":
 
@@ -520,7 +501,7 @@ namespace Chaos
                                     Avanzar(1);
                                     break;
                                 default:
-                                    AñadirError("no es una funcion valida");
+                                    AñadirError("F-NV01","Funcion: Default: No se reconocio la funcion","no es una funcion valida");
                                     Avanzar(1);
                                     break;
                                 case "(":
@@ -572,8 +553,7 @@ namespace Chaos
                                 //Termina el if del valor de token + 1
                                 else
                                 {
-                                    Avanzar(1);
-                                    AñadirError("No esta bien declarado la varible " + Tokens[Pos]);
+                                    AñadirError("V-NASG01","Variable: No se asigna la variable","No esta bien declarado la variable");
                                 }
 
                             }//Si no hay tokens suficientes para declarar una variable
@@ -582,7 +562,7 @@ namespace Chaos
                                 ImprimirPorDebug("No existe tokens en tokens + 2");
                                 if (Valargs == "Depurar")
                                 {
-                                    AñadirError("No hay suficientes tokens para declarar la variable ");
+                                    AñadirError("V-OFB01","Variable: No existen tokens suficientes","No hay suficientes tokens para declarar la variable");
                                     //aqui añade a la lista de errores este error
                                 }
                                 //situacion de error
@@ -592,7 +572,7 @@ namespace Chaos
                             continue;
                         default:
                             ImprimirPorDebug(Tokens[Pos + 1].ToString() + "UWU");
-                            AñadirError("El tipo del token no es valido");
+                            AñadirError("T-NV01", "Tipo: Default: El tipo del token no fue esperado", "El tipo del token no es valido");
                             Avanzar(1);
                             break;
 
@@ -728,12 +708,15 @@ namespace Chaos
                 ////////////////////
                 //  AÑADIR ERROR  //
                 ////////////////////
-                void AñadirError(string mensaje)
+                void AñadirError(string Codigo, string Seccion,string mensaje)
                 {
-                    Errores.Add((mensaje, Pos));
-                    Console.WriteLine(mensaje + " " + Tokens[Pos] + " " + Pos);
-                    Console.ReadLine();
-
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine("ERROR " + Codigo);
+                    Console.WriteLine("SECCION " + Seccion);
+                    Console.WriteLine(mensaje + " " + Tokens[Pos] + " " + (Pos + 1));
+                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.ReadKey();
+                    Environment.Exit(-1);
                 }
 
                 ////////////////////
@@ -781,7 +764,7 @@ namespace Chaos
                                             break;
                                         default:
                                             ImprimirPorDebug("Invalida operacion string " + Sumador);
-                                            AñadirError("Solo se puede sumar string");
+                                            AñadirError("OM-S!+S01","OperacionM: Mientras sea funcion: Tipo: String: Default: Operador no valido","Solo se puede sumar string");
                                             Avanzar(1);
                                             break;
                                     }
@@ -809,7 +792,7 @@ namespace Chaos
                                                 break;
                                             default:
 
-                                                AñadirError("Caracter operacion invalido");
+                                                AñadirError("OM-NV01", "OperacionM: Mientras sea funcion: Tipo: Entero: Default: Operador no valido", "Caracter operacion invalido");
                                                 Avanzar(1);
                                                 break;
                                         }
@@ -843,7 +826,7 @@ namespace Chaos
                                                     Sumador = ((Int32.Parse(Variables[Nuevo].Valor) / Int32.Parse(Sumador.Valor)).ToString(), "Entero");
                                                     break;
                                                 default:
-                                                    AñadirError("Caracter operacion invalido");
+                                                    AñadirError("OM-NV02", "OperacionM: Mientras sea funcion: Tipo: Variable: Default: Operador no valido", "Caracter operacion invalido");
                                                     Avanzar(1);
                                                     break;
                                             }
@@ -858,7 +841,7 @@ namespace Chaos
                                                     Compilado += " " + Tokens[Pos].Valor + " " + Variables[Nuevo].Nombre;
                                                     break;
                                                 default:
-                                                    AñadirError("Solo se puede sumar string");
+                                                    AñadirError("OM-S!+S02","OperacionM: Mientras sea funcion: Tipo: Variable: Si no son enteros: Valor: Default: Operador no valido","Solo se puede sumar string");
                                                     Avanzar(1);
                                                     break;
                                             }
@@ -867,18 +850,18 @@ namespace Chaos
                                     else
                                     {
                                         //Si no existe la variable a operar
-                                        AñadirError("No puedes asignar una variable no declarada");
+                                        AñadirError("OM-VNF01", "OperacionM: Mientras sea funcion: Tipo: Variable: No fue encontrado", "No puedes asignar una variable no declarada");
                                         Avanzar(1);
                                     }
                                     break;
                                 case "Funcion":
                                     //No se puede sumar con Leer o {Leer} por que aun no se declaro su contenido
-                                    AñadirError("No se puede operar con una funcion");
+                                    AñadirError("OM-NV03", "OperacionM: Mientras sea funcion: Tipo: Funcion: No se puede operar funciones", "No se puede operar con una funcion");
                                     Avanzar(1);
                                     break;
                                 default:
                                     //Si trata de operar con Booleanos
-                                    AñadirError("No se puede operar con otro tipo ademas de string, entero y funcion");
+                                    AñadirError("OM-NV04", "OperacionM: Mientras sea funcion: Tipo: Default: EJ: Booleano", "No se puede operar con otro tipo ademas de string, entero y funcion");
                                     Avanzar(1);
                                     break;
                             }
@@ -923,7 +906,7 @@ namespace Chaos
                             else
                             {
                                 //Si no existe la variable a asignar
-                                AñadirError("Esta asignando una variable no declarada");
+                                AñadirError("OM-VNF02","OperacionM: PrimeroVal: Variable no encontrada","Esta asignando una variable no declarada");
                                 Avanzar(1);
                             }
                         }
@@ -978,7 +961,7 @@ namespace Chaos
                             //Si es alguna otra funcion
                             else
                             {
-                                AñadirError("La unica funcion que se le puede asignar a una variable es la funcion Leer");
+                                AñadirError("OM-NV05","OperacionM: PrimeroVal: Funcion: Tipo: Default: No se permite otra funcion","La unica funcion que se le puede asignar a una variable es la funcion Leer");
                                 Avanzar(1);
                                 return ("", "");
                             }
@@ -1132,7 +1115,7 @@ namespace Chaos
                             Compilado += " !=";
                             break;
                         default:
-                            AñadirError("Operacion logica no valida");
+                            AñadirError("FS-NV01","FuncionSi: Funcion: Tipo: Default: No valido","Operacion logica no valida");
                             Avanzar(1);
                             break;
                     }
@@ -1160,7 +1143,7 @@ namespace Chaos
                             else
                             {
                                 //Sino dar error
-                                AñadirError("No se puede operar logicamente con otro tipo ademas de entero");
+                                AñadirError("FS-NV02", "FuncionSi: Funcion: Tipo: <: !E<E: No valido", "No se puede operar logicamente con otro tipo ademas de entero");
                                 Avanzar(1);
                                 return false;
                             }
@@ -1182,7 +1165,7 @@ namespace Chaos
                             else
                             {
                                 //Sino dar error
-                                AñadirError("No se puede operar logicamente con otro tipo ademas de entero");
+                                AñadirError("FS-NV03", "FuncionSi: Funcion: Tipo: >: !E>E: No valido", "No se puede operar logicamente con otro tipo ademas de entero");
                                 Avanzar(1);
                                 return false;
                             }
@@ -1223,7 +1206,7 @@ namespace Chaos
                             //NOTA: Seccion a repensar
                             else
                             {
-                                AñadirError("No se puede operar logicamente");
+                                AñadirError("FS-NV04","FuncionSi: Funcion: Tipo: =: Tipo!Tipo: No es valido","No se puede operar logicamente con variables de distinto tipo");
                                 Avanzar(1);
                                 return false;
                             }
@@ -1264,13 +1247,13 @@ namespace Chaos
                             //NOTA: Seccion a repensar
                             else
                             {
-                                AñadirError("No se puede operar logicamente");
+                                AñadirError("FS-NV05", "FuncionSi: Funcion: Tipo: !: Tipo!Tipo: No es valido", "No se puede operar logicamente con variables de distinto tipo");
                                 Avanzar(1);
                                 return false;
                             }
                         //Si es algun operador logico que no existe en el lenguaje
                         default:
-                            AñadirError("No es una opcion valida " + Funcion);
+                            AñadirError("FS-NV06","FuncionSi: Funcion: Tipo: Default: No valido","No es una opcion valida " + Funcion);
                             Avanzar(1);
                             return false;
                     }
