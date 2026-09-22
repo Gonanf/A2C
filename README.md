@@ -1,54 +1,6 @@
-# A2C
-
-> Lenguaje de programacion hecho por estudiantes de tecnica secundaria de programacion
-> **Lenguaje principal (GitHub):** C# · **URL:** https://github.com/Gonanf/A2C
-
-## Qué es
-
-Este repositorio forma parte de la colección de **Gonanf / Gabriel Solotorevsky** clonada en `/run/media/chaos/terciario/proyectos/A2C`.
-
-> **Nota:** README original preservado abajo en la sección "README original".
-
-- **Path absoluto:** `/run/media/chaos/terciario/proyectos/A2C`
-- **Estado git:** último commit `2023-11-12 Add files via upload`
-- **Archivos (aprox):** 32
-- **Stack detectado:** Lenguajes principales: .cs (1 archivos)
-
-## Stack
-
-- Lenguajes principales: .cs (1 archivos)
-
-## Estructura
-
-```
-A2C/
-Instalar A2C.exe
-Program.cs
-README.md
-```
-
-## Cómo correr
-
-> Instrucciones genéricas según el stack detectado. Ajustar según el repo.
-
-Revisar archivos en la raíz (index.html, Makefile, scripts) y abrir/ejectuar según corresponda.
-Sin entrypoint estándar detectado — ver sección Estructura.
-
-## Estado
-
-- **Último commit:** `2023-11-12 Add files via upload`
-- **Clonado en:** `/run/media/chaos/terciario/proyectos/A2C`
-- **Exclusiones del lote:** Forks, Workmatch, el-hornero-digital, mali/meli, Sherut (no tocados por consigna)
-
-## Docs
-
-- `docs/overview.md` — descripción extendida y guía rápida (generado en este lote)
-
-## README original (preservado)
-
-> Contenido previo de README.md recortado a 2000 chars para referencia:
-
-```markdown
+<p align="center">
+  <img src="assets/banner.png" alt="A2C" width="100%">
+</p>
 
 # A2C
 
@@ -129,9 +81,81 @@ JIT: No realiza ningun archivo ejecutable pero si ejecuta las instrucciones en l
 
 CMP: Realiza un archivo ejecutable con el nombre del archivo .arb y no ejecuta las intrucciones en la consola
 
-Ambos: Realiza un archivo ejecutable y ejecuta las instrucc
-```
+Ambos: Realiza un archivo ejecutable y ejecuta las instrucciones en la consola
 
----
-*README generado/mejorado automáticamente el 2026-09-04 con inspección de repo (opencode/agy pattern: lectura de estructura, lenguaje y entrypoints). No se modificó código, solo documentación.*
-*Autor original: Gonanf — https://github.com/Gonanf/A2C*
+
+Ejemplo de comando:
+
+
+A2C Ambos Nombre
+
+
+**SINTAXIS:** Es literal, tiene que estar perfectamente escrito y tener espacios por cada accion o habra errores
+
+
+
+**Funciones:**
+
+
+Imprimir -> Imprime en pantalla
+
+Leer -> Lee lo que el usuario le coloque en la consola
+
+{Leer} -> Toma los numeros que coloque el usuario en la consola
+
+Si -> Es un condicional, verifica si es verdadero
+
+
+**Tipos de datos:**
+
+"Texto" -> String, tipo de valor que almacena caracteres
+
+3123 -> Para los numeros no se necesitan ningun identificador
+
+Variable -> Las variables no se necesitan declarar con un tipo, no deben ser ninguna funcion
+
+Verdadero -> Booleano verdadero
+
+Falso -> Booleano falso
+
+
+**OPERADORES:**
+
+
+**Operadores matematicos:**
+
+**+** -> Suma, lo soportan los enteros y strings
+
+**-** -> Resta, lo soportan los enteros
+
+__*__ -> Multiplicacion, lo soportan los enteros
+
+**/** -> Divicion, lo soportan los enteros
+
+
+**Operadores logicos:**
+
+
+**<** -> Menor a, lo soportan los enteros
+
+**>** -> Mayor a, lo soportan los enteros
+
+**=** -> Igual a, los soportan todos los tipos de datos
+
+**!** -> Distinto a, lo soportan todos los tipos de datos
+
+
+**ESTRUCTURA:**
+
+
+Imprimir "Texto" + Variable -> Este es un ejemplo de imprimir
+
+Variable = Leer -> Almacena en Variable lo que el usuario coloque en la consola como string
+
+Variable = {Leer} -> Almacena en Variable los numeros que el usuario coloque en la consola como entero
+
+Si 1 = 2 ( Imprimir "Esto no puede pasar!" ) -> Este es un ejemplo, verifica si 1 es igual a 2, como es falso no ejecutara lo que este #dentro de las parentesis
+
+
+En caso de encontrar errores reportelo aqui: https://github.com/Gonanf/A2C"
+
